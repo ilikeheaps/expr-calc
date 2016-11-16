@@ -1,2 +1,2 @@
 # expr-calc
-Simple program for evaluating expressions.
+Simple program for evaluating arithmetic expressions.
