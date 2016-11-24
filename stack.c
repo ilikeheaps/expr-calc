@@ -1,5 +1,5 @@
 /*
-   Basic stack structure for FIFO queue. When removing elements, it won't deallocate the data of elements it contained so you have to  handle it when removing each element. You can't destroy a non-empty stack. The stack can't contain NULL element (some functions return NULL as an error value).
+   Basic stack structure for FIFO queue. When removing elements, it won't deallocate the data of elements it contained so you have to  handle it when removing each element. You can't delete a non-empty stack. The stack can't contain NULL element (some functions return NULL as an error value).
  */
 #include "stack.h"
 #include <stdlib.h>
@@ -11,8 +11,6 @@ struct Stack
     void** data;
 };
 
-typedef struct Stack Stack;
- 
 /*
  * NULL - memory allocation error
  */
@@ -36,9 +34,24 @@ Stack* newStack(int size)
 }
 
 /*
+ * 1 - stack contains elements and can't be removed
+ */
+int deleteStack(Stack* s)
+{
+    if(s -> size != 0)
+        return 1;
+    else
+    {
+        free(s->data);
+        free(s);
+        return 0;
+    }
+}
+
+/*
  * 1 - couldn't allocate memory for the new element
  */
-int push(Stack* s, void* el)
+int pushSt(Stack* s, void* el)
 {
     if(s->size >= s->capacity)
     {
@@ -66,7 +79,7 @@ int push(Stack* s, void* el)
 /*
  * NULL - stack is empty
  */
-void* top(Stack* s)
+void* topSt(Stack* s)
 {
     if(s->size > 1)
         return s->data[s->size - 1];
@@ -79,7 +92,7 @@ void* top(Stack* s)
  * Return values on error:
  * NULL - no elements on the stack
  */
-void* pop(Stack* s)
+void* popSt(Stack* s)
 {
     if(s->size < 1)
         return NULL;
@@ -87,12 +100,12 @@ void* pop(Stack* s)
     return s->data[--s->size];
 }
 
-int size(Stack* s)
+int sizeSt(Stack* s)
 {
     return s->size;
 }
 
-int isEmpty(Stack* s)
+int isEmptySt(Stack* s)
 {
     if(s->size == 0)
         return 1;
@@ -104,7 +117,7 @@ int isEmpty(Stack* s)
  * 1 - failed to reallocate memory, stack unchanged
  * 2 - attempting to set the capacity smaller than size (would lead to memory corruption)
  */
-int setSize(Stack* s, int new_capacity)
+int setSizeSt(Stack* s, int new_capacity)
 {
     if(new_capacity < s->size)
         return 2;
