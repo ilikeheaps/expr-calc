@@ -1,4 +1,5 @@
 #include "tree.h"
+#include "stack.h"
 #include <stdlib.h>
 
 struct Tree
@@ -7,6 +8,27 @@ struct Tree
     Tree* left;
     Tree* right;
 };
+
+struct TreeIterator
+{
+    Stack* parents;
+    Tree* current;
+};
+
+/*
+ * returns NULL on failure (memory allocation error)
+ */
+TreeIterator* newTreeIt(Tree* tree)
+{
+    TreeIterator* ret = malloc(sizeof(*ret));
+    if(ret != NULL)
+    {
+        ret -> parents = newStack(INIT_STACK_SIZE); //defined in tree.h
+        ret -> current = tree;
+    }
+    return ret;
+}
+
 
 
 
@@ -20,7 +42,7 @@ void* DFT(Tree* tree, void*(*fun)(void* left_value, void* right_value, void* val
 
 
 /*
- * returns NULL pointer upon failure
+ * returns NULL pointer upon failure (memory allocation error)
  */
 Tree* newTree(void* value)
 {
