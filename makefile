@@ -11,7 +11,7 @@ stack.o: stack.c stack.h
 main.o: main.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-tree.o: tree.c tree.h
+tree.o: tree.c tree.h stack.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clear:
