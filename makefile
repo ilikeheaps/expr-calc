@@ -10,7 +10,10 @@ calc: $(OBJ)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clear:
-	rm *.o
+	rm -f *.o
+
+delete: clear
+	rm calc
 
 stack.o: stack.c stack.h
 main.o: main.c
