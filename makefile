@@ -2,6 +2,7 @@ CC = gcc
 CFLAGS = -Wall
 OBJ = main.o stack.o tree.o
 
+
 calc: $(OBJ)
 	$(CC) $(CFLAGS) -o calc $<
 
@@ -13,6 +14,9 @@ main.o: main.c
 
 tree.o: tree.c tree.h stack.h
 	$(CC) $(CFLAGS) -c -o $@ $<
-
+	
+sort.o: sort.c sort.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 clear:
 	rm *.o
+	
