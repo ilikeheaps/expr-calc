@@ -17,5 +17,5 @@ delete: clear
 
 stack.o: stack.c stack.h
 main.o: main.c
-tree.o: tree.c tree.h stack.h
+tree.o: tree.c tree.h stack.o
 sort.o: sort.c sort.h
