@@ -27,24 +27,32 @@ typedef struct
 {
     int priority;
     int arity;
-    double (*function)(); //???: arity arguments
+    double (*function)(Tree**); //takes an array of arity values as argument
+                                // (see comments in eval function)
     notation type;
 } Operator;
     
-    
+int applyOp(Stack* values, Operator* op)
+{
+    //TODO
+}
 
-void eval(Token** expr, int tokenCount)
+Tree* eval(Token** expr, int tokenCount)
 {
     Stack* operators = newStack();
+    if(operators == NULL)
+    {
+        printf("Couldn't allocate memory for operators stack\n");
+        return;
+    }
     
     //values - stack of trees that represent a value
     //  (the value can be obtained by traversing the tree)
     Stack* values = newStack();
-    
-    
-    if(operators == NULL || values = null)
+    if(values = null)
     {
-        printf("Stack memory allocation error\n");
+        printf("Couldn't allocate memory for values stack\n");
+        deleteStack(operators);
         return;
     }
     
@@ -54,38 +62,65 @@ void eval(Token** expr, int tokenCount)
         {
             //note: applying operators means applying them to the top elements of the values stack
             case operator:
+                Operator* currOp = expr[i] -> value;
+                if(currOp -> type == bifix
                 /*TODO
                  * 1) apply operators to values until the priority of the top element of the stack is equal to or lower than the priority of the current element (or only lower depending on the associativity)
                  * 2) push the new operator onto the stack
                  */
                 break;
             case value:
-                //TODO: handle newTree and pushSt errors
-                pushSt(values, newTree(expr[i] -> value));
+                Tree* valueTree = newTree(expr[i] -> value);
+                if(valueTree == NULL)
+                {
+                    printf("eval line __LINE__: couldn't allocate tree node\n");
+                    //TODO: deallocate stacks
+                }
+                Tree* newVal = newTree(expr[i]) -> value);
+                if(newVal == NULL)
+                {
+                    //TODO: error
+                    return;
+                }
+                if(pushSt(values, newVal))
+                {
+                    //TODO: error
+                    return;
+                }
                 break;
             case openBracket:
                 pushSt(operators, expr[i]);
                 break;
             case endBracket:
-                //TODO: apply operators up to openBracket (and remove openBracket)
+                //TODO: handle errors: popSt, applyOp
+                Operator* opTop = popSt(operators)
+                while(opTop -> type != openBracket)
+                {
+                    applyOp(values, opTop)
+                    opTop = popSt(operators);
+                }
+                (void) popSt;
                 break;
-                //TODO: default
+            //TODO: default: error
         }
         
     }
     
     //TODO: apply operators to values until there is only one value left
     // if there are any operators left, return some error
+    
+    return topSt(values);
 }
 
 int main(int argc, char* args[])
 {    
     /*
+     * TODO: allocate/initialize operators
      * TODO: initialize parser
      * TODO: read a string and parse it (to Token**)
      * TODO: eval(expr);
+     * TODO: free parser and operators
      */
-    
     
     return 0;
 }
