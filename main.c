@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "tree.h"
 #include "stack.h"
+#include "operator.h"
 
 typedef enum
 {
@@ -15,27 +16,6 @@ typedef struct
     atom type;
     void* value;
 } Token;
-
-typedef enum
-{
-    bifix,
-    prefix,
-    infix
-} notation;
-
-typedef struct
-{
-    int priority;
-    int arity;
-    double (*function)(Tree**); //takes an array of arity values as argument
-                                // (see comments in eval function)
-    notation type;
-} Operator;
-    
-int applyOp(Stack* values, Operator* op)
-{
-    //TODO
-}
 
 Tree* eval(Token** expr, int tokenCount)
 {
