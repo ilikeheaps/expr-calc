@@ -33,4 +33,4 @@ int setSizeSt(struct Stack*, int);
 
 Stack* newStack(int);
 
-int deletedStack(Stack*);
+int deleteStack(Stack*);
