@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall
-OBJ = main.o stack.o tree.o
+OBJ = main.o stack.o bintree.o
 
 
 calc: $(OBJ)
@@ -17,5 +17,5 @@ delete: clear
 
 stack.o: stack.c stack.h
 main.o: main.c
-tree.o: tree.c tree.h stack.o
+bintree.o: bintree.c bintree.h stack.o
 sort.o: sort.c sort.h

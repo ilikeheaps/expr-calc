@@ -1,26 +1,26 @@
-#include "tree.h"
+#include "bintree.h"
 #include "stack.h"
 #include <stdlib.h>
 
-struct Tree
+struct BinTree
 {
     void* value;
-    Tree* left;
-    Tree* right;
+    BinTree* left;
+    BinTree* right;
 };
 
-struct TreeIterator
+struct BinTreeIterator
 {
     Stack* parents;
-    Tree* current;
+    BinTree* current;
 };
 
 /*
  * returns NULL on failure (memory allocation error)
  */
-TreeIterator* newTreeIt(Tree* tree)
+BinTreeIterator* newTreeIt(BinTree* tree)
 {
-    TreeIterator* ret = malloc(sizeof(*ret));
+    BinTreeIterator* ret = malloc(sizeof(*ret));
     if(ret != NULL)
     {
         ret -> parents = newStack(INIT_STACK_SIZE); //defined in tree.h
@@ -32,21 +32,21 @@ TreeIterator* newTreeIt(Tree* tree)
 
 
 
-void* DFT(Tree* tree, void*(*fun)(void* left_value, void* right_value, void* value))
+void* BinTreeDFT(BinTree* tree, void*(*fun)(void* left_value, void* right_value, void* value))
 {
     if(tree == NULL)
         return NULL;
     else
-        return fun(DFT(tree->left, fun), DFT(tree->right, fun), tree->value);
+        return fun(BinTreeDFT(tree->left, fun), BinTreeDFT(tree->right, fun), tree->value);
 }
 
 
 /*
  * returns NULL pointer upon failure (memory allocation error)
  */
-Tree* newTree(void* value)
+BinTree* newBinTree(void* value)
 {
-    Tree* pntr = malloc(sizeof(*pntr));
+    BinTree* pntr = malloc(sizeof(*pntr));
     if(pntr != NULL)
     {
         pntr->value = NULL;
@@ -59,9 +59,9 @@ Tree* newTree(void* value)
 /*
  * returns NULL pointer upon failure
  */
-Tree* joinTrees(Tree* left, Tree* right, void* value)
+BinTree* joinBinTrees(BinTree* left, BinTree* right, void* value)
 {
-    Tree* pntr = malloc(sizeof(*pntr));
+    BinTree* pntr = malloc(sizeof(*pntr));
     if(pntr != NULL)
     {
         pntr->value = value;
