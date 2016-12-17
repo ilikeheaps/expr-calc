@@ -11,8 +11,8 @@ typedef struct
 {
     int priority;
     int arity;
-    double (*function)(double**); //takes an NULL-terminated array of arity values as argument
+    double (*function)(double**); //takes a n NULL-terminated array of arity values as argument
     notation type;
 } Operator;
 
-void applyOpToSt(Operator*, Stack*);
+int applyOpToSt(Operator*, Stack*);
