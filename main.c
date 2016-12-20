@@ -79,6 +79,7 @@ Tree* eval(Token** expr, int tokenCount)
                     applyOp(values, opTop)
                     opTop = popSt(operators);
                 }
+                //removes opening bracket
                 (void) popSt(operators);
                 break;
             //TODO: default: error
