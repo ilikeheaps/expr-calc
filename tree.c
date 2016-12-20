@@ -33,10 +33,10 @@ Tree* joinTrees(void* value, Tree** trees)
 //careful: fun must deallocate the second argument if it doesn't keep it
 void* TreeDFT(Tree* startNode, void* (*fun)(void*, void**)
 {
-    Tree* current = startNode -> children;
+    Tree** current = startNode -> children;
     int childrenCount = 0;
     
-    while(current != NULL)
+    while(*current != NULL)
     {
         childrenCount++;
         current++;
