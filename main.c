@@ -79,7 +79,7 @@ Tree* eval(Token** expr, int tokenCount)
                     applyOp(values, opTop)
                     opTop = popSt(operators);
                 }
-                (void) popSt;
+                (void) popSt(operators);
                 break;
             //TODO: default: error
         }
