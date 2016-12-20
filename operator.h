@@ -2,7 +2,6 @@
 
 typedef enum
 {
-    bifix,
     prefix,
     infix
 } notation;

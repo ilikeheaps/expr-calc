@@ -43,7 +43,6 @@ Tree* eval(Token** expr, int tokenCount)
             //note: applying operators means applying them to the top elements of the values stack
             case operator:
                 Operator* currOp = expr[i] -> value;
-                if(currOp -> type == bifix
                 /*TODO
                  * 1) apply operators to values until the priority of the top element of the stack is equal to or lower than the priority of the current element (or only lower depending on the associativity)
                  * 2) push the new operator onto the stack
