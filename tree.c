@@ -30,6 +30,7 @@ Tree* joinTrees(void* value, Tree** trees)
     return ret;
 }
 
+//careful: fun must deallocate the second argument if it doesn't keep it
 void* TreeDFT(Tree* startNode, void* (*fun)(void*, void**)
 {
     Tree* current = startNode -> children;
@@ -49,5 +50,18 @@ void* TreeDFT(Tree* startNode, void* (*fun)(void*, void**)
     childrenValues[childrenCount] = NULL;
     
     return fun(startNode->value, childrenValues);
+}
+
+void deleteTree(Tree* root, void (*deleteValue)(void*))
+{
+    Tree** current = root -> children;
+    while(*current != NULL)
+    {
+        deleteTree(*current, deleteValue);
+        current++;
+    }
+    free(root -> children);
+    deleteValue(root -> value);
+    free(root);
 }
         
