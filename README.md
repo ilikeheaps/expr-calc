@@ -12,7 +12,7 @@ Simple program in C for evaluating arithmetic expressions.
 2. division: "/"
 3. addition: "+"
 4. subtraction: "-"
-5. exponentation: "^"
+5. exponentiation: "^"
 
 #Functions:
 1. square root: "sqrt( )"
