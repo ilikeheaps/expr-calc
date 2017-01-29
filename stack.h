@@ -31,6 +31,6 @@ int isEmptySt(struct Stack*);
  */
 int setSizeSt(struct Stack*, int);
 
-Stack* newStack(int);
+Stack* newStack();
 
 int deleteStack(Stack*);

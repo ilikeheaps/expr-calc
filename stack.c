@@ -14,20 +14,22 @@ struct Stack
 /*
  * NULL - memory allocation error
  */
-Stack* newStack(int size)
+Stack* newStack()
 {
+    int cap = 5;
+    
     Stack* s = malloc(sizeof(*s));
     if(s == NULL)
         return NULL;
     
-    s->data = malloc(size*sizeof(*s->data));
+    s->data = malloc(cap*sizeof(*s->data));
     if(s->data == NULL)
     {
         free(s);
         return NULL;
     }
     
-    s->capacity = size;
+    s->capacity = cap;
     s->size = 0;
     
     return s;

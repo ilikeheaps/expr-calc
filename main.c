@@ -2,38 +2,49 @@
 #include "tree.h"
 #include "stack.h"
 #include "operator.h"
+#include "main.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-typedef enum
-{
-    operator,
-    value,
-    openBracket,
-    endBracket
-} atom;
 
-typedef struct
+
+//returns -1 if the stack doesn't have enough values to apply the function
+int applyOpToSt(Token* opToken, Stack* st)
 {
-    atom type;
-    void* value;
-} Token;
+    //opToken type should be operator
+    Operator* op = (Operator*) opToken -> value;
+    if(sizeSt(st) < op -> arity)
+        return -1;
+    
+    Tree** values = malloc( (op->arity + 1) * sizeof(*values) );
+    
+    int imax = op -> arity;
+    for(int i=0; i < imax; i++)
+        values[i] = popSt(st);
+    values[imax] = NULL;
+    
+    pushSt(st, joinTrees(op, values));
+    return 0;
+}
 
 Tree* makeOpTree(Token** expr)
 {
+    //cotains operators or brackets packed into token structure
     Stack* operators = newStack();
     if(operators == NULL)
     {
         printf("Couldn't allocate memory for operators stack\n");
-        return;
+        return NULL;
     }
     
     //values - stack of trees that represent a value to be calculated
     //  (the value can be obtained by traversing the tree)
     Stack* values = newStack();
-    if(values = null)
+    if(values == NULL)
     {
         printf("Couldn't allocate memory for values stack\n");
         deleteStack(operators);
-        return;
+        return NULL;
     }
     
     for(Token** currentToken = expr; currentToken != NULL; currentToken++)
@@ -41,65 +52,89 @@ Tree* makeOpTree(Token** expr)
         switch((*currentToken)->type)
         {
             //note: applying operators means applying them to the top elements of the values stack
-            case operator:
+            case operator: ;
                 Operator* currOp = (*currentToken) -> value;
                 if(currOp -> assoc == left)
                 {
                     //apply operators to values until the priority of the top element of the stack is lower than the priority of the current element
-                    while(emptySt(operators) || topSt(operators) -> priority < currOp -> priority)
+                    while(1)
                     {
-                        Operator* opTop = (Operator*) popSt(operators);
+                        if(isEmptySt(operators))
+                            break;
+                        
+                        Token* opTop = topSt(operators);
+                        //this should only be operator or opening bracket
+                        if(opTop -> type != operator)
+                            break;
+                        if(((Operator*) opTop -> value) -> priority < currOp -> priority)
+                            break;
+                        
+                        
+                        Operator* opRem = (Operator*) popSt(operators);
                         //TODO: error handling
-                        applyOpToSt(opTop, values);
+                        applyOpToSt(opRem, values);
                         //TODO: error handling
                     }
                 }
                 else //right-associative
                 {
                     //apply operators to values until the priority of the top element of the stack is lower than the priority of the current element
-                    while(emptySt(operators) || topSt(operators) -> priority <= currOp -> priority)
+                    while(1)
                     {
-                        Operator* opTop = (Operator*) popSt(operators);
+                        if(isEmptySt(operators))
+                            break;
+                        
+                        Token* opTop = topSt(operators);
+                        //this should only be operator or opening bracket
+                        if(opTop -> type != operator)
+                            break;
+                        if(((Operator*) opTop -> value) -> priority <= currOp -> priority)
+                            break;
+                        
+                        Operator* opRem = (Operator*) popSt(operators);
                         //TODO: error handling
-                        applyOpToSt(opTop, values);
+                        applyOpToSt(opRem, values);
                         //TODO: error handling
                     }
                 }
-                //push the new operator onto the stack
-                pushSt(operators, currOp);
+                //push the new operator (still packed as a token) onto the stack
+                pushSt(operators, *currentToken);
                 break;
-            case value:
-                Tree* valueTree = newTree((*currentToken) -> value);
+            case value: ;
+                Tree* valueTree;
+                valueTree = newTree((*currentToken) -> value);
                 if(valueTree == NULL)
                 {
                     printf("eval line __LINE__: couldn't allocate tree node\n");
                     //TODO: deallocate stacks
                 }
-                Tree* newVal = newTree((*currentToken)) -> value);
+                Tree* newVal = newTree((*currentToken) -> value);
                 if(newVal == NULL)
                 {
                     //TODO: error handling
-                    return;
+                    return NULL;
                 }
                 if(pushSt(values, newVal))
                 {
                     //TODO: error handling
-                    return;
+                    return NULL;
                 }
                 break;
             case openBracket:
-                pushSt(operators, expr[i]);
+                pushSt(operators, *currentToken);
                 break;
-            case endBracket:
+            case endBracket: ;
                 //TODO: handle errors: popSt, applyOp
-                Operator* opTop = (Operator*) popSt(operators)
+                Token* opTop;
+                opTop = (Token*) popSt(operators);
                 while(opTop -> type != openBracket)
                 {
-                    applyOpToSt(opTop, values)
+                    //opTop should be of operator type
+                    applyOpToSt((Operator*) opTop -> value, values);
                     opTop = (Operator*) popSt(operators);
                 }
                 //removes opening bracket
-                (void) popSt(operators);
+                //chyba nie (void) popSt(operators);
                 break;
             //TODO: default: error
         }
@@ -122,15 +157,91 @@ Tree* makeOpTree(Token** expr)
     return ans;
 }
 
+double sum(double** args){
+    return *args[0] + *args[1];
+}
+
+double diff(double** args){
+    return *args[0] - *args[1];
+}
+
+double mult(double** args){
+    return *args[0] * *args[1];
+}
+
+double divi(double** args){
+    return *args[0] / *args[1];
+}
+
+double my_sqrt(double** args){
+    //TODO
+    return 0;
+}
+
+double sqr(double** args){
+    //TODO
+    return 0;
+}
+
+double my_pow(double** args){
+    //TODO
+    return 0;
+}
+
+#define opsCount 7
+
 int main(int argc, char* args[])
 {    
+    
     /*
-     * TODO: allocate/initialize operators
-     * TODO: initialize parser
-     * TODO: read a string and parse it (to Token**)
-     * TODO: eval(expr);
-     * TODO: free parser and operators
+     * TODO: CHECK: allocate/initialize operators
+     * TODO: allocate tokens
+     * TODO: initialize tokenizer
+     * TODO: read a string and tokenize it
+     * TODO: eval(opTree);
+     * TODO: free tokenizer and operators
      */
+    
+    Operator ops[opsCount] = {
+                //infix operators:
+                     {.priority = 5,
+                      .arity = 2,
+                      .function = sum,
+                      .notation = infix,
+                      .assoc = left},
+                     {.priority = 5,
+                      .arity = 2,
+                      .function = diff,
+                      .notation = infix,
+                      .assoc = left},
+                     {.priority = 6,
+                      .arity = 2,
+                      .function = mult,
+                      .notation = infix,
+                      .assoc = left},
+                     {.priority = 6,
+                      .arity = 2,
+                      .function = divi,
+                      .notation = infix,
+                      .assoc = left},
+                //functions:
+                     {.priority = 1,
+                      .arity = 1,
+                      .function = my_sqrt,
+                      .notation = prefix,
+                      .assoc = right},
+                     {.priority = 1,
+                      .arity = 1,
+                      .function = sqr,
+                      .notation = prefix,
+                      .assoc = right},
+                     {.priority = 1,
+                      .arity = 2,
+                      .function = my_pow,
+                      .notation = prefix,
+                      .assoc = right}
+                    };
+    
     
     return 0;
 }

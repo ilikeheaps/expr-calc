@@ -1,5 +1,3 @@
-#include "stack.h"
-
 typedef enum
 {
     prefix,
@@ -21,4 +19,16 @@ typedef struct
     direction_type assoc; //associativity
 } Operator;
 
-int applyOpToSt(Operator*, Stack*);
+typedef enum
+{
+    operator,
+    value,
+    openBracket,
+    endBracket
+} atom;
+
+typedef struct
+{
+    atom type;
+    void* value;
+} Token;
