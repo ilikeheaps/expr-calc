@@ -14,7 +14,7 @@ typedef struct
 {
     int priority;
     int arity;
-    double (*function)(double**); //takes a NULL-terminated array of arity values as argument
+    double (*function)(double*); //takes an array of arity values as argument
     notation_type notation;
     direction_type assoc; //associativity
 } Operator;

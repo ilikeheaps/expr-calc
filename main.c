@@ -157,51 +157,44 @@ Tree* makeOpTree(Token** expr)
     return ans;
 }
 
-double sum(double** args){
-    return *args[0] + *args[1];
+double sum(double* args){
+    return args[0] + args[1];
 }
 
-double diff(double** args){
-    return *args[0] - *args[1];
+double diff(double* args){
+    return args[0] - args[1];
 }
 
-double mult(double** args){
-    return *args[0] * *args[1];
+double mult(double* args){
+    return args[0] * args[1];
 }
 
-double divi(double** args){
-    return *args[0] / *args[1];
+double my_div(double* args){
+    return args[0] / args[1];
 }
 
-double my_sqrt(double** args){
+double my_sqrt(double* args){
     //TODO
     return 0;
 }
 
-double sqr(double** args){
+double sqr(double* args){
     //TODO
     return 0;
 }
 
-double my_pow(double** args){
+double my_pow(double* args){
     //TODO
     return 0;
 }
+
+Operator* newOperator(int priority, int arity, double
 
 #define opsCount 7
 
 int main(int argc, char* args[])
 {    
-    
-    /*
-     * TODO: CHECK: allocate/initialize operators
-     * TODO: allocate tokens
-     * TODO: initialize tokenizer
-     * TODO: read a string and tokenize it
-     * TODO: eval(opTree);
-     * TODO: free tokenizer and operators
-     */
-    
+    //TODO: CHECK: allocate/initialize operators
     Operator ops[opsCount] = {
                 //infix operators:
                      {.priority = 5,
@@ -221,7 +214,7 @@ int main(int argc, char* args[])
                       .assoc = left},
                      {.priority = 6,
                       .arity = 2,
-                      .function = divi,
+                      .function = my_div,
                       .notation = infix,
                       .assoc = left},
                 //functions:
@@ -241,6 +234,22 @@ int main(int argc, char* args[])
                       .notation = prefix,
                       .assoc = right}
                     };
+    
+    //TODO: allocate tokens
+    //size: opsCount operators, brackets (2), value and NULL pointer to indicate end
+    Token** tokens = malloc((opsCount + 4) * sizeof(*tokens));
+    for(int i=0; i < opsCount; i++)
+    {
+        tokens[i] = malloc(sizeof(*tokens));
+        *tokens[i] = {.type = operator, .value = &ops[i]};
+    }
+    
+    /*
+     * TODO: initialize tokenizer
+     * TODO: read a string and tokenize it
+     * TODO: eval(opTree);
+     * TODO: free tokenizer and operators
+     */
     
     
     return 0;
