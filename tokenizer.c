@@ -76,6 +76,10 @@ void tokenizer_initialize()
                       newToken(operator, newOperator(10, 1, my_sqrt, prefix, right)));
     add_to_dictionary("sqr",
                       newToken(operator, newOperator(10, 1, sqr, prefix, right)));
+    
+    //brackets
+    add_to_dictionary("(", newToken(openBracket, NULL));
+    add_to_dictionary(")", newToken(endBracket, NULL));
 }
 
 void deleteNode(Tree* node)
