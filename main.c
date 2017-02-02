@@ -46,12 +46,14 @@ Tree* makeOpTree(Token** expr)
         return NULL;
     }
     
-    for(Token** currentToken = expr; currentToken != NULL; currentToken++)
+    for(Token** currentToken = expr; *currentToken != NULL; currentToken++)
     {
+        printf("Parsing next token...\n");
         switch((*currentToken)->type)
         {
             //note: applying operators means applying them to the top elements of the values stack
             case operator: ;
+                printf("Found operator\n");
                 Operator* currOp = (*currentToken) -> value;
                 if(currOp -> assoc == left)
                 {
@@ -100,6 +102,7 @@ Tree* makeOpTree(Token** expr)
                 pushSt(operators, *currentToken);
                 break;
             case value: ;
+                printf("Found value\n");
                 Tree* newVal = newTree((*currentToken) -> value);
                 if(newVal == NULL)
                 {
@@ -113,9 +116,11 @@ Tree* makeOpTree(Token** expr)
                 }
                 break;
             case openBracket:
+                printf("Found opening bracket\n");
                 pushSt(operators, *currentToken);
                 break;
             case endBracket: ;
+                printf("Found ending bracket\n");
                 //TODO: handle errors: popSt, applyOp
                 Token* opTop;
                 opTop = (Token*) popSt(operators);
@@ -188,14 +193,24 @@ int main(int argc, char* args[])
     */
     
     //initialize tokenizer
+    printf("Initializing tokenizer\n");
     tokenizer_initialize();
     
     //read a string and tokenize it
+    printf("Input: ");
     scanf("%s", input);
+    
+    printf("Tokenizing expression\n");
     Token** tokens = tokenizer_process(input);
     
+    Token** tok;
+    for(tok = tokens; *tok != NULL; tok++);
+    printf("# of tokens: %ld\n", tok - tokens);
+    
     //make operation tree and evaluate it
+    printf("Parsing tokens\n");
     Tree* opTree = makeOpTree(tokens);
+    printf("Calculating value\n");
     double val = calcNode(opTree);
     
     printf("%lf\n", val);

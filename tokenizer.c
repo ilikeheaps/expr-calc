@@ -116,6 +116,7 @@ char* skip_dot(char* text)
 
 Token** tokenizer_process(char* exp)
 {
+    printf(" exp: %s\n", exp);
     double* val = malloc(sizeof(*val));
     
     /*char* current_word = malloc(initial_array_size * sizeof(*tokenized));
@@ -129,15 +130,21 @@ Token** tokenizer_process(char* exp)
     int token_count = 0;
     int tokens_capacity = initial_array_size;
     
-    while(*current_char != '\0')
+    while(printf(" current character: %c\n", *current_char) 
+          && *current_char != '\0')
     {
         if(*current_char == ' ')
+        {
+            printf("  skipping space\n");
             current_char++;
+        }
         else
             //special case for value tokens
-            if(1 == sscanf(current_char, "%lf", val))
+            if(*current_char >= '0' && *current_char <= '9' && 1 == sscanf(current_char, "%lf", val))
             {   
+                printf("  Found a value\n");
                 current_char = skip_digits(skip_dot(skip_digits(current_char)));
+                printf("   Skipping value characters -> %ld\n", current_char - exp);
                 tokenized[token_count] = newToken(value, val);
                 token_count++;
                 if(token_count >= tokens_capacity)
@@ -149,13 +156,19 @@ Token** tokenizer_process(char* exp)
             }
             else
             {
-                while(current_word != NULL && *current_char != '\0')
+                printf("  Trying to match a label\n");
+                while(current_word != NULL 
+                      && current_word -> children[(int) *current_char - first_char] != NULL
+                      && *current_char != ' '
+                      && *current_char != '\0')
                 {
+                    printf("    Current character: %c\n", *current_char);
                     current_word = current_word -> children[(int) *current_char - first_char];
                     current_char++;
                 }
                 if(current_word != NULL)
                 {
+                    printf("   Found a match\n");
                     Token* match = current_word->value;
                     tokenized[token_count] = match;
                     token_count++;
