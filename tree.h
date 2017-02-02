@@ -1,3 +1,4 @@
+#pragma once
 struct Tree;
 typedef struct Tree Tree;
 

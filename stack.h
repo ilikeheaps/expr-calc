@@ -1,3 +1,4 @@
+#pragma once
 /*
    Basic stack structure for FIFO queue. When removing elements, it won't deallocate the data of elements it contained so you have to  handle it when removing each element. You can't destroy a non-empty stack. The stack can't contain null element (some functions return null as an error value).
  */
