@@ -195,7 +195,6 @@ Token** tokenizer_process(char* exp)
                     printf("Błąd na %ld znaku: nie znaleziono etykiety\n", current_char - exp);
                     
                     free(val);
-                    free(current_word);
                     //TODO: free value tokens and tokenized array
                     return NULL;
                 }
@@ -207,7 +206,6 @@ Token** tokenizer_process(char* exp)
     tokenized[token_count] = NULL;
     
     free(val);
-    free(current_word);
     
     return tokenized;
 }

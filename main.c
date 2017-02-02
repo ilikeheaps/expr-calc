@@ -164,36 +164,14 @@ double calcNode(Tree* node)
     }
 }
 
-#define max_line_len 100
+#define max_line_len 1000
 
 char input[max_line_len + 1];
 
-int main(int argc, char* args[])
-{    
-    
-    
-    //TODO: allocate tokens
-    
-    /*
-    //size: opsCount operators, brackets (2), value and NULL pointer to indicate end
-    Token** tokens = malloc((opsCount + 4) * sizeof(*tokens));
-    for(int i=0; i < opsCount; i++)
-    {
-        tokens[i] = malloc(sizeof(*tokens));
-        *tokens[i] = {.type = operator, .value = &ops[i]};
-    }
-    */
-    
-    //initialize tokenizer
-    printf("Initializing tokenizer\n");
-    tokenizer_initialize();
-    
-    //read a string and tokenize it
-    printf("Input: ");
-    fgets(input, max_line_len, stdin);
-    
+double eval(char* exp)
+{
     printf("Tokenizing expression\n");
-    Token** tokens = tokenizer_process(input);
+    Token** tokens = tokenizer_process(exp);
     
     Token** tok;
     for(tok = tokens; *tok != NULL; tok++);
@@ -205,10 +183,43 @@ int main(int argc, char* args[])
     printf("Calculating value\n");
     double val = calcNode(opTree);
     
-    printf("%lf\n", val);
+    //TODO: free operation tree (and everything included in it: tokens?, values)
     
+    return val;
+}
+
+int main(int argc, char* args[])
+{    
+    printf("%d %s\n", argc, args[1]);
+    //initialize tokenizer
+    printf("Initializing tokenizer\n");
+    tokenizer_initialize();
     
-    //TODO: free tokenizer, operation tree and operators
+    if(argc > 1)
+    {
+        for(int i=1; i<argc; i++)
+            printf("%lf\n", eval(args[i]));
+    }
+    else
+        //interactive mode
+        while(1)
+        {
+            //read a string and tokenize it
+            printf("Input: ");
+            fgets(input, max_line_len, stdin);
+            
+            if(input[0] == 'e' &&
+               input[1] == 'x' &&
+               input[2] == 'i' &&
+               input[3] == 't' &&
+              (input[4] == '\n' || input[4] == '\0'))
+                break;
+            
+            
+            printf("%lf\n", eval(input));
+        }
+    
+    //TODO: free tokenizer
     
     return 0;
 }
