@@ -1,8 +1,8 @@
 #include "parser.h"
 #include "tree.h"
 #include "stack.h"
-#include "operator.h"
 #include "main.h"
+#include "tokenizer.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -188,7 +188,11 @@ double my_pow(double* args){
     return 0;
 }
 
-Operator* newOperator(int priority, int arity, double
+Operator* newOperator(int priority, int arity, double (*function)(double*), notation_type notation, direction_type assoc)
+{
+    //TODO
+    return NULL;
+}
 
 #define opsCount 7
 
@@ -236,6 +240,8 @@ int main(int argc, char* args[])
                     };
     
     //TODO: allocate tokens
+    
+    /*
     //size: opsCount operators, brackets (2), value and NULL pointer to indicate end
     Token** tokens = malloc((opsCount + 4) * sizeof(*tokens));
     for(int i=0; i < opsCount; i++)
@@ -243,6 +249,7 @@ int main(int argc, char* args[])
         tokens[i] = malloc(sizeof(*tokens));
         *tokens[i] = {.type = operator, .value = &ops[i]};
     }
+    */
     
     /*
      * TODO: initialize tokenizer

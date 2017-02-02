@@ -19,16 +19,3 @@ typedef struct
     direction_type assoc; //associativity
 } Operator;
 
-typedef enum
-{
-    operator,
-    value,
-    openBracket,
-    endBracket
-} atom;
-
-typedef struct
-{
-    atom type;
-    void* value;
-} Token;

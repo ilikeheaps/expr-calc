@@ -20,9 +20,27 @@ Tree* allocateNode()
 //nodes in dictionary must have their children array allocated
 Tree* dictionary;
 
-void initialize()
+void tokenizer_initialize()
 {
     dictionary = allocateNode();
+}
+
+void deleteNode(Tree* node)
+{
+    if(node == NULL)
+        return;
+    else
+    {
+        //assumes node->children isn't null
+        Tree** it = node -> children;
+        while(*it != NULL)
+            deleteNode(*it);
+    }
+}
+
+void tokenizer_cleanup()
+{
+    deleteNode(dictionary);
 }
 
 Token* get_token_dict(char* label)
@@ -62,20 +80,92 @@ void add_to_dictionary(char* label, Token* token)
     current_word->value = token;
 }
 
-
-Token* process(char* exp)
+char* skip_digits(char* text)
 {
-    char* current_word = malloc(initial_array_size * sizeof(*tokenized));
+    char* current = text;
+    while('0' <= *current && *current <= '9')
+        current++;
+    return current;
+}
+
+char* skip_dot(char* text)
+{
+    char* current = text;
+    if(*current == '.')
+        return current + 1;
+    else
+        return current;
+}
+
+Token* tokenizer_process(char* exp)
+{
+    double* val = malloc(sizeof(*val));
+    
+    /*char* current_word = malloc(initial_array_size * sizeof(*tokenized));
     int word_capacity = initial_array_size;
-    int word_size = 0;
+    int word_size = 0;*/
+    
+    Tree* current_word = dictionary;
     
     char* current_char = exp;
     Token** tokenized = malloc(initial_array_size * sizeof(*tokenized));
-    //remeber about space for terminating null
+    int token_count = 0;
     int tokens_capacity = initial_array_size;
     
     while(*current_char != '\0')
     {
-        //TODO
+        if(*current_char == ' ')
+            current_char++;
+        else
+            //special case for value tokens
+            if(word_size == 0 && sscanf(current_char, "%lf", val))
+            {   
+                current_char = skip_digits(skip_dot(skip_digits(current_char)));
+                tokenized[token_count] = newToken(value, val);
+                token_count++;
+                if(token_count >= tokens_capacity)
+                {
+                    tokens_capacity = 2 * tokens_capacity;
+                    tokenized = realloc(tokenized, tokens_capacity * sizeof(*tokenized));
+                }
+                val = malloc(sizeof(*val));
+            }
+            else
+            {
+                while(current_word != NULL && *current_char != '\0')
+                {
+                    current_word = current_word -> children[(int) *current_char - first_char];
+                    current_char++;
+                }
+                if(current_word != NULL)
+                {
+                    Token* match = current_word->value;
+                    tokenized[token_count] = match;
+                    token_count++;
+                    if(token_count >= tokens_capacity)
+                    {
+                        tokens_capacity = 2 * tokens_capacity;
+                        tokenized = realloc(tokenized, tokens_capacity * sizeof(*tokenized));
+                    }
+                }
+                else
+                {
+                    printf("Błąd na %d znaku: nie znaleziono etykiety\n", current_char - exp)
+                    
+                    free(val);
+                    free(current_word);
+                    //TODO: free value tokens and tokenized array
+                    return NULL;
+                }
+            }
     }
+    
+    //add terminating NULL to the end of tokenized
+    tokenized = realloc(tokenized, (token_count + 1) * sizeof(*tokenized));
+    tokenized[token_count] = NULL;
+    
+    free(val);
+    free(current_word);
+    
+    return tokenized;
 }
