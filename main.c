@@ -189,7 +189,19 @@ Operator* newOperator(int priority, int arity, double (*function)(double*), nota
 
 double calcNode(Tree* node)
 {
-    
+    if(node -> children == NULL)
+        return (double) *(node -> value);
+    else
+    {
+        int count;
+        for(count=0; node->children[i] != NULL; count++);
+        double* children_val = malloc(count * sizeof(*children_val));
+        for(int i=0; i < count; i++)
+            children_val[i] = calcNode(node->children[i]);
+        double ret = ((double(*)(double*))node->value)(children_val);
+        free(children_val);
+        return ret;
+    }
 }
 
 #define opsCount 7
@@ -257,9 +269,12 @@ int main(int argc, char* args[])
     
     //read a string and tokenize it
     scanf("%s", input);
-    tokenizer_process(input);
+    Token** tokens = tokenizer_process(input);
     
-    //TODO: eval(opTree);
+    //make operation tree and evaluate it
+    Tree* opTree = makeOpTree(tokens);
+    
+    double val = calcNode(opTree);
     
     
     //TODO: free tokenizer and operators
