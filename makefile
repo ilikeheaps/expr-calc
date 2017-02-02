@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -Wall
 OBJ = stack.o tree.o tokenizer.o operator.o token.o
-
+LIB = -lm
 
 calc: main.c $(OBJ)
-	$(CC) $(CFLAGS) -o calc $^
+	$(CC) $(CFLAGS) -o calc $^ $(LIB)
 
 *.o :
 	$(CC) $(CFLAGS) -c -o $@ $<

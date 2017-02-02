@@ -1,5 +1,6 @@
 #include "operator.h"
 #include <stdlib.h>
+#include <math.h>
 
 double sum(double* args){
     return args[1] + args[0];
@@ -18,18 +19,19 @@ double my_div(double* args){
 }
 
 double my_sqrt(double* args){
-    //TODO
-    return 0;
+    return sqrt(args[0]);
 }
 
 double sqr(double* args){
-    //TODO
-    return 0;
+    return args[0] * args[0];
 }
 
 double my_pow(double* args){
-    //TODO
-    return 0;
+    return pow(args[1], args[0]);
+}
+
+double sum2(double* args){
+    return args[1] + args[0];
 }
 
 Operator* newOperator(int priority, int arity, double (*function)(double*), notation_type notation, direction_type assoc)

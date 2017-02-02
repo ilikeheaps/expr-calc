@@ -79,6 +79,7 @@ void tokenizer_initialize()
     //prefix functions
     add_to_dictionary("sqrt", functionToken(10, 1, my_sqrt, prefix, right));
     add_to_dictionary("sqr", functionToken(10, 1, sqr, prefix, right));
+    add_to_dictionary("sum2", functionToken(10, 2, sum2, prefix, right));
     
     
     //brackets

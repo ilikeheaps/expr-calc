@@ -27,4 +27,5 @@ double my_div(double* args);
 double my_sqrt(double* args);
 double sqr(double* args);
 double my_pow(double* args);
+double sum2(double* args);
 Operator* newOperator(int priority, int arity, double (*function)(double*), notation_type notation, direction_type assoc);
