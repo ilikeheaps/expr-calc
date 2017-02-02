@@ -21,10 +21,12 @@ int applyOpToSt(Operator* op, Stack* st)
         values[i] = popSt(st);
     values[imax] = NULL;
     
-    pushSt(st, joinTrees(op, values));
+    pushSt(st, joinTrees(op->function, values));
     return 0;
 }
 
+//value type in inner nodes: double (*)(double*)
+//value type in leaves: double* <-- must be freed later
 Tree* makeOpTree(Token** expr)
 {
     //cotains operators or brackets packed into token structure
@@ -99,13 +101,6 @@ Tree* makeOpTree(Token** expr)
                 pushSt(operators, *currentToken);
                 break;
             case value: ;
-                Tree* valueTree;
-                valueTree = newTree((*currentToken) -> value);
-                if(valueTree == NULL)
-                {
-                    printf("eval line __LINE__: couldn't allocate tree node\n");
-                    //TODO: deallocate stacks
-                }
                 Tree* newVal = newTree((*currentToken) -> value);
                 if(newVal == NULL)
                 {
@@ -192,7 +187,15 @@ Operator* newOperator(int priority, int arity, double (*function)(double*), nota
     return NULL;
 }
 
+double calcNode(Tree* node)
+{
+    
+}
+
 #define opsCount 7
+#define max_line_len 100
+
+char input[max_line_len + 1];
 
 int main(int argc, char* args[])
 {    
@@ -249,13 +252,17 @@ int main(int argc, char* args[])
     }
     */
     
-    /*
-     * TODO: initialize tokenizer
-     * TODO: read a string and tokenize it
-     * TODO: eval(opTree);
-     * TODO: free tokenizer and operators
-     */
+    //initialize tokenizer
+    tokenizer_initialize();
     
+    //read a string and tokenize it
+    scanf("%s", input);
+    tokenizer_process(input);
+    
+    //TODO: eval(opTree);
+    
+    
+    //TODO: free tokenizer and operators
     
     return 0;
 }
