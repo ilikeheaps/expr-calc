@@ -10,17 +10,13 @@
 //returns -1 if the stack doesn't have enough values to apply the function
 int applyOpToSt(Operator* op, Stack* st)
 {
-    printf("  op: %p\n", op);
-    printf("  Stack size: %d\n", sizeSt(st));
-    printf("  Expecting %d arguments\n", op -> arity);
+    printf("   op: %p\n", op);
+    printf("   Stack size: %d\n", sizeSt(st));
+    printf("   Expecting %d arguments\n", op -> arity);
     if(sizeSt(st) < op -> arity)
         return -1;
     
-    printf("  Seg1\n");
-    
     Tree** values = malloc( (op->arity + 1) * sizeof(*values) );
-    
-    printf("  Seg2\n");
     
     int imax = op -> arity;
     for(int i=0; i < imax; i++)
@@ -72,28 +68,28 @@ Tree* makeOpTree(Token** expr)
                     if(opTop -> type != operator)
                         break;
                     if( currOp -> assoc == left
-                        && ((Operator*) opTop -> value) -> priority < currOp -> priority)
+                        && ((Operator*)(opTop -> value)) -> priority < currOp -> priority)
                     {
                         break;
                     }
                     if( currOp -> assoc == right
-                        && ((Operator*) opTop -> value) -> priority <= currOp -> priority)
+                        && ((Operator*)(opTop -> value)) -> priority <= currOp -> priority)
                     {
                         break;
                     }
                     
-                    Operator* opRem = (Operator*) popSt(operators);
+                    Operator* opRem = (Operator*) ((Token*)popSt(operators)) -> value;
                     //TODO: error handling
                     applyOpToSt(opRem, values);
                     //TODO: error handling
                 }
                 
                 //push the new operator (still packed as a token) onto the stack
-                printf("  Pushing %p onto operator stack\n", *currentToken);
+                printf("   Pushing %p onto operator stack\n", *currentToken);
                 pushSt(operators, *currentToken);
                 break;
             case value: ;
-                printf("  Found value\n");
+                printf("   Found value\n");
                 Tree* newVal = newTree((*currentToken) -> value);
                 if(newVal == NULL)
                 {
@@ -195,7 +191,7 @@ int main(int argc, char* args[])
     
     //read a string and tokenize it
     printf("Input: ");
-    scanf("%s", input);
+    fgets(input, max_line_len, stdin);
     
     printf("Tokenizing expression\n");
     Token** tokens = tokenizer_process(input);

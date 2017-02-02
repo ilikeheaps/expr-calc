@@ -134,8 +134,10 @@ Token** tokenizer_process(char* exp)
     int token_count = 0;
     int tokens_capacity = initial_array_size;
     
-    while(printf(" current character: %c\n", *current_char) 
-          && *current_char != '\0')
+    while(printf(" current character: [%ld]->%c\n", current_char - exp, *current_char)
+          && printf("comp c=='\\0' -> %d\n", *current_char == '\0')
+          && *current_char != '\0'
+          && *current_char != '\n')
     {
         if(*current_char == ' ')
         {
@@ -162,15 +164,16 @@ Token** tokenizer_process(char* exp)
             {
                 printf("  Trying to match a label\n");
                 while(current_word != NULL 
-                      && current_word -> children[(int) *current_char - first_char] != NULL
                       && *current_char != ' '
-                      && *current_char != '\0')
+                      && *current_char != '\0'
+                      && *current_char != '\n'
+                      && current_word -> children[(int) *current_char - first_char] != NULL)
                 {
                     printf("    Current character: %c\n", *current_char);
                     current_word = current_word -> children[(int) *current_char - first_char];
                     current_char++;
                 }
-                if(current_word != NULL)
+                if(current_word != NULL && current_word -> value != NULL)
                 {
                     printf("   Found a match\n");
                     Token* match = current_word->value;
