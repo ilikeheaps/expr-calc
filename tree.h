@@ -1,4 +1,9 @@
-struct Tree;
+struct Tree
+{
+    Tree** children; //null-terminated array
+    void* value;
+};
+
 typedef struct Tree Tree;
 
 Tree* newTree(void* value);

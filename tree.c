@@ -1,11 +1,6 @@
 #include "tree.h"
 #include <stdlib.h>
 
-struct Tree{
-    Tree** children; //null-terminated array
-    void* value;
-};
-
 //returns NULL on memory allocation failure
 Tree* newTree(void* value)
 {
