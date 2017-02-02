@@ -1,7 +1,6 @@
 #include "parser.h"
 #include "tree.h"
 #include "stack.h"
-#include "main.h"
 #include "tokenizer.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -150,51 +149,15 @@ Tree* makeOpTree(Token** expr)
     return ans;
 }
 
-double sum(double* args){
-    return args[0] + args[1];
-}
-
-double diff(double* args){
-    return args[0] - args[1];
-}
-
-double mult(double* args){
-    return args[0] * args[1];
-}
-
-double my_div(double* args){
-    return args[0] / args[1];
-}
-
-double my_sqrt(double* args){
-    //TODO
-    return 0;
-}
-
-double sqr(double* args){
-    //TODO
-    return 0;
-}
-
-double my_pow(double* args){
-    //TODO
-    return 0;
-}
-
-Operator* newOperator(int priority, int arity, double (*function)(double*), notation_type notation, direction_type assoc)
-{
-    //TODO
-    return NULL;
-}
 
 double calcNode(Tree* node)
 {
     if(node -> children == NULL)
-        return (double) *(node -> value);
+        return *((double*)(node -> value));
     else
     {
         int count;
-        for(count=0; node->children[i] != NULL; count++);
+        for(count=0; node->children[count] != NULL; count++);
         double* children_val = malloc(count * sizeof(*children_val));
         for(int i=0; i < count; i++)
             children_val[i] = calcNode(node->children[i]);
@@ -204,53 +167,13 @@ double calcNode(Tree* node)
     }
 }
 
-#define opsCount 7
 #define max_line_len 100
 
 char input[max_line_len + 1];
 
 int main(int argc, char* args[])
 {    
-    //TODO: CHECK: allocate/initialize operators
-    Operator ops[opsCount] = {
-                //infix operators:
-                     {.priority = 5,
-                      .arity = 2,
-                      .function = sum,
-                      .notation = infix,
-                      .assoc = left},
-                     {.priority = 5,
-                      .arity = 2,
-                      .function = diff,
-                      .notation = infix,
-                      .assoc = left},
-                     {.priority = 6,
-                      .arity = 2,
-                      .function = mult,
-                      .notation = infix,
-                      .assoc = left},
-                     {.priority = 6,
-                      .arity = 2,
-                      .function = my_div,
-                      .notation = infix,
-                      .assoc = left},
-                //functions:
-                     {.priority = 1,
-                      .arity = 1,
-                      .function = my_sqrt,
-                      .notation = prefix,
-                      .assoc = right},
-                     {.priority = 1,
-                      .arity = 1,
-                      .function = sqr,
-                      .notation = prefix,
-                      .assoc = right},
-                     {.priority = 1,
-                      .arity = 2,
-                      .function = my_pow,
-                      .notation = prefix,
-                      .assoc = right}
-                    };
+    
     
     //TODO: allocate tokens
     
@@ -273,11 +196,12 @@ int main(int argc, char* args[])
     
     //make operation tree and evaluate it
     Tree* opTree = makeOpTree(tokens);
-    
     double val = calcNode(opTree);
     
+    printf("%lf\n", val);
     
-    //TODO: free tokenizer and operators
+    
+    //TODO: free tokenizer, operation tree and operators
     
     return 0;
 }

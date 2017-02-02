@@ -1,4 +1,5 @@
 #include "token.h"
+#include <stdlib.h>
 
 Token* newToken(atom type, void* value)
 {

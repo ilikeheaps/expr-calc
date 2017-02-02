@@ -1,4 +1,6 @@
 #include "tokenizer.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /*
  * tokens can use ascii symbols ranging from 21 (!) to 126 (~); 20 (space) is reserved for token separation
@@ -6,7 +8,7 @@
 
 const int last_char = 126;
 const int first_char = 21;
-const int char_count = last_char - first_char + 1;
+const int char_count = 126 - 21 + 1; //last - first + 1
 //arrays of yet unknown size will be allocated with this size
 const int initial_array_size = 10;
 
@@ -20,8 +22,51 @@ Tree* allocateNode()
 //nodes in dictionary must have their children array allocated
 Tree* dictionary;
 
+#define opsCount 7
+
 void tokenizer_initialize()
 {
+    //TODO: CHECK: allocate/initialize operators
+    Operator ops[opsCount] = {
+                //infix operators:
+                     {.priority = 5,
+                      .arity = 2,
+                      .function = sum,
+                      .notation = infix,
+                      .assoc = left},
+                     {.priority = 5,
+                      .arity = 2,
+                      .function = diff,
+                      .notation = infix,
+                      .assoc = left},
+                     {.priority = 6,
+                      .arity = 2,
+                      .function = mult,
+                      .notation = infix,
+                      .assoc = left},
+                     {.priority = 6,
+                      .arity = 2,
+                      .function = my_div,
+                      .notation = infix,
+                      .assoc = left},
+                //functions:
+                     {.priority = 1,
+                      .arity = 1,
+                      .function = my_sqrt,
+                      .notation = prefix,
+                      .assoc = right},
+                     {.priority = 1,
+                      .arity = 1,
+                      .function = sqr,
+                      .notation = prefix,
+                      .assoc = right},
+                     {.priority = 1,
+                      .arity = 2,
+                      .function = my_pow,
+                      .notation = prefix,
+                      .assoc = right}
+                    };
+    
     dictionary = allocateNode();
 }
 
@@ -97,7 +142,7 @@ char* skip_dot(char* text)
         return current;
 }
 
-Token* tokenizer_process(char* exp)
+Token** tokenizer_process(char* exp)
 {
     double* val = malloc(sizeof(*val));
     
@@ -118,7 +163,7 @@ Token* tokenizer_process(char* exp)
             current_char++;
         else
             //special case for value tokens
-            if(word_size == 0 && sscanf(current_char, "%lf", val))
+            if(1 == sscanf(current_char, "%lf", val))
             {   
                 current_char = skip_digits(skip_dot(skip_digits(current_char)));
                 tokenized[token_count] = newToken(value, val);
@@ -150,7 +195,7 @@ Token* tokenizer_process(char* exp)
                 }
                 else
                 {
-                    printf("Błąd na %d znaku: nie znaleziono etykiety\n", current_char - exp)
+                    printf("Błąd na %ld znaku: nie znaleziono etykiety\n", current_char - exp);
                     
                     free(val);
                     free(current_word);
