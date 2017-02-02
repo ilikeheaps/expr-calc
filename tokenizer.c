@@ -59,23 +59,27 @@ void add_to_dictionary(char* label, Token* token)
     current_word->value = token;
 }
 
+Token* functionToken(int priority, int arity, double(*func)(double*), notation_type notation, direction_type assoc)
+{
+    return newToken(operator, newOperator(priority, arity, func, notation, assoc));
+}
+
 #define opsCount 7
 void tokenizer_initialize()
 {
     dictionary = allocateNode();
     
     //infix operators
-    add_to_dictionary("+", newToken(operator, newOperator(5, 2, sum, infix, left)));
-    add_to_dictionary("-", newToken(operator, newOperator(5, 2, diff, infix, left)));
-    add_to_dictionary("*", newToken(operator, newOperator(6, 2, mult, infix, left)));
-    add_to_dictionary("/", newToken(operator, newOperator(6, 2, my_div, infix, left)));
-    add_to_dictionary("^", newToken(operator, newOperator(7, 2, my_pow, infix, right)));
+    add_to_dictionary("+", functionToken(5, 2, sum, infix, left));
+    add_to_dictionary("-", functionToken(5, 2, diff, infix, left));
+    add_to_dictionary("*", functionToken(6, 2, mult, infix, left));
+    add_to_dictionary("/", functionToken(6, 2, my_div, infix, left));
+    add_to_dictionary("^", functionToken(7, 2, my_pow, infix, right));
     
     //prefix functions
-    add_to_dictionary("sqrt",
-                      newToken(operator, newOperator(10, 1, my_sqrt, prefix, right)));
-    add_to_dictionary("sqr",
-                      newToken(operator, newOperator(10, 1, sqr, prefix, right)));
+    add_to_dictionary("sqrt", functionToken(10, 1, my_sqrt, prefix, right));
+    add_to_dictionary("sqr", functionToken(10, 1, sqr, prefix, right));
+    
     
     //brackets
     add_to_dictionary("(", newToken(openBracket, NULL));
@@ -134,8 +138,7 @@ Token** tokenizer_process(char* exp)
     int token_count = 0;
     int tokens_capacity = initial_array_size;
     
-    while(printf(" current character: [%ld]->%c\n", current_char - exp, *current_char)
-          && printf("comp c=='\\0' -> %d\n", *current_char == '\0')
+    while(printf(" current character: [%ld]->\"%c\"\n", current_char - exp, *current_char)
           && *current_char != '\0'
           && *current_char != '\n')
     {
@@ -169,7 +172,7 @@ Token** tokenizer_process(char* exp)
                       && *current_char != '\n'
                       && current_word -> children[(int) *current_char - first_char] != NULL)
                 {
-                    printf("    Current character: %c\n", *current_char);
+                    printf("    Current character: \"%c\"\n", *current_char);
                     current_word = current_word -> children[(int) *current_char - first_char];
                     current_char++;
                 }
