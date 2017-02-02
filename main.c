@@ -10,10 +10,17 @@
 //returns -1 if the stack doesn't have enough values to apply the function
 int applyOpToSt(Operator* op, Stack* st)
 {
+    printf("  op: %p\n", op);
+    printf("  Stack size: %d\n", sizeSt(st));
+    printf("  Expecting %d arguments\n", op -> arity);
     if(sizeSt(st) < op -> arity)
         return -1;
     
+    printf("  Seg1\n");
+    
     Tree** values = malloc( (op->arity + 1) * sizeof(*values) );
+    
+    printf("  Seg2\n");
     
     int imax = op -> arity;
     for(int i=0; i < imax; i++)
@@ -48,61 +55,45 @@ Tree* makeOpTree(Token** expr)
     
     for(Token** currentToken = expr; *currentToken != NULL; currentToken++)
     {
-        printf("Parsing next token...\n");
+        printf(" Parsing next token...\n");
         switch((*currentToken)->type)
         {
             //note: applying operators means applying them to the top elements of the values stack
             case operator: ;
-                printf("Found operator\n");
+                printf("  Found operator\n");
                 Operator* currOp = (*currentToken) -> value;
-                if(currOp -> assoc == left)
+                while(1)
                 {
-                    //apply operators to values until the priority of the top element of the stack is lower than the priority of the current element
-                    while(1)
+                    if(isEmptySt(operators))
+                        break;
+                    
+                    Token* opTop = topSt(operators);
+                    //this should only be operator or opening bracket
+                    if(opTop -> type != operator)
+                        break;
+                    if( currOp -> assoc == left
+                        && ((Operator*) opTop -> value) -> priority < currOp -> priority)
                     {
-                        if(isEmptySt(operators))
-                            break;
-                        
-                        Token* opTop = topSt(operators);
-                        //this should only be operator or opening bracket
-                        if(opTop -> type != operator)
-                            break;
-                        if(((Operator*) opTop -> value) -> priority < currOp -> priority)
-                            break;
-                        
-                        
-                        Operator* opRem = (Operator*) popSt(operators);
-                        //TODO: error handling
-                        applyOpToSt(opRem, values);
-                        //TODO: error handling
+                        break;
                     }
-                }
-                else //right-associative
-                {
-                    //apply operators to values until the priority of the top element of the stack is lower than the priority of the current element
-                    while(1)
+                    if( currOp -> assoc == right
+                        && ((Operator*) opTop -> value) -> priority <= currOp -> priority)
                     {
-                        if(isEmptySt(operators))
-                            break;
-                        
-                        Token* opTop = topSt(operators);
-                        //this should only be operator or opening bracket
-                        if(opTop -> type != operator)
-                            break;
-                        if(((Operator*) opTop -> value) -> priority <= currOp -> priority)
-                            break;
-                        
-                        Operator* opRem = (Operator*) popSt(operators);
-                        //TODO: error handling
-                        applyOpToSt(opRem, values);
-                        //TODO: error handling
+                        break;
                     }
+                    
+                    Operator* opRem = (Operator*) popSt(operators);
+                    //TODO: error handling
+                    applyOpToSt(opRem, values);
+                    //TODO: error handling
                 }
+                
                 //push the new operator (still packed as a token) onto the stack
+                printf("  Pushing %p onto operator stack\n", *currentToken);
                 pushSt(operators, *currentToken);
                 break;
             case value: ;
-                printf("Found value\n");
+                printf("  Found value\n");
                 Tree* newVal = newTree((*currentToken) -> value);
                 if(newVal == NULL)
                 {
@@ -116,11 +107,11 @@ Tree* makeOpTree(Token** expr)
                 }
                 break;
             case openBracket:
-                printf("Found opening bracket\n");
+                printf("  Found opening bracket\n");
                 pushSt(operators, *currentToken);
                 break;
             case endBracket: ;
-                printf("Found ending bracket\n");
+                printf("  Found ending bracket\n");
                 //TODO: handle errors: popSt, applyOp
                 Token* opTop;
                 opTop = (Token*) popSt(operators);
@@ -137,15 +128,21 @@ Tree* makeOpTree(Token** expr)
         }
         
     }
+    printf("Parsed all tokens, reducing stacks\n");
     
     
     //apply operators to values until there is only one value left
     //TODO: if there are any operators left, return some error
     while(sizeSt(values) > 1)
     {
-        Operator* opTop = topSt(operators);
+        printf(" Operators stack size: %d\n", sizeSt(operators));
+        Token* opToken = popSt(operators);
+        printf(" token: %p\n", opToken);
+        Operator* opTop = opToken -> value;
         //TODO: error handling
+        printf(" Applying operator to stack...\n");
         applyOpToSt(opTop, values);
+        printf(" Applied\n");
     }
     Tree* ans = popSt(values);
         
