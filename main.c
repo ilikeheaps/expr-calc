@@ -9,10 +9,8 @@
 
 
 //returns -1 if the stack doesn't have enough values to apply the function
-int applyOpToSt(Token* opToken, Stack* st)
+int applyOpToSt(Operator* op, Stack* st)
 {
-    //opToken type should be operator
-    Operator* op = (Operator*) opToken -> value;
     if(sizeSt(st) < op -> arity)
         return -1;
     
@@ -131,7 +129,7 @@ Tree* makeOpTree(Token** expr)
                 {
                     //opTop should be of operator type
                     applyOpToSt((Operator*) opTop -> value, values);
-                    opTop = (Operator*) popSt(operators);
+                    opTop = (Token*) popSt(operators);
                 }
                 //removes opening bracket
                 //chyba nie (void) popSt(operators);
