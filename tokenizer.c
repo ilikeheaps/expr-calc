@@ -177,6 +177,7 @@ Token** tokenizer_process(char* exp)
                         tokens_capacity = 2 * tokens_capacity;
                         tokenized = realloc(tokenized, tokens_capacity * sizeof(*tokenized));
                     }
+                    current_word = dictionary;
                 }
                 else
                 {
