@@ -22,72 +22,6 @@ Tree* allocateNode()
 //nodes in dictionary must have their children array allocated
 Tree* dictionary;
 
-#define opsCount 7
-
-void tokenizer_initialize()
-{
-    //TODO: CHECK: allocate/initialize operators
-    Operator ops[opsCount] = {
-                //infix operators:
-                     {.priority = 5,
-                      .arity = 2,
-                      .function = sum,
-                      .notation = infix,
-                      .assoc = left},
-                     {.priority = 5,
-                      .arity = 2,
-                      .function = diff,
-                      .notation = infix,
-                      .assoc = left},
-                     {.priority = 6,
-                      .arity = 2,
-                      .function = mult,
-                      .notation = infix,
-                      .assoc = left},
-                     {.priority = 6,
-                      .arity = 2,
-                      .function = my_div,
-                      .notation = infix,
-                      .assoc = left},
-                //functions:
-                     {.priority = 1,
-                      .arity = 1,
-                      .function = my_sqrt,
-                      .notation = prefix,
-                      .assoc = right},
-                     {.priority = 1,
-                      .arity = 1,
-                      .function = sqr,
-                      .notation = prefix,
-                      .assoc = right},
-                     {.priority = 1,
-                      .arity = 2,
-                      .function = my_pow,
-                      .notation = prefix,
-                      .assoc = right}
-                    };
-    
-    dictionary = allocateNode();
-}
-
-void deleteNode(Tree* node)
-{
-    if(node == NULL)
-        return;
-    else
-    {
-        //assumes node->children isn't null
-        Tree** it = node -> children;
-        while(*it != NULL)
-            deleteNode(*it);
-    }
-}
-
-void tokenizer_cleanup()
-{
-    deleteNode(dictionary);
-}
-
 Token* get_token_dict(char* label)
 {
     char* current_char = label;
@@ -124,6 +58,44 @@ void add_to_dictionary(char* label, Token* token)
     }
     current_word->value = token;
 }
+
+#define opsCount 7
+void tokenizer_initialize()
+{
+    dictionary = allocateNode();
+    
+    //infix operators
+    add_to_dictionary("+", newToken(operator, newOperator(5, 2, sum, infix, left)));
+    add_to_dictionary("-", newToken(operator, newOperator(5, 2, diff, infix, left)));
+    add_to_dictionary("*", newToken(operator, newOperator(6, 2, mult, infix, left)));
+    add_to_dictionary("/", newToken(operator, newOperator(6, 2, my_div, infix, left)));
+    add_to_dictionary("^", newToken(operator, newOperator(7, 2, my_pow, infix, right)));
+    
+    //prefix functions
+    add_to_dictionary("sqrt",
+                      newToken(operator, newOperator(10, 1, my_sqrt, prefix, right)));
+    add_to_dictionary("sqr",
+                      newToken(operator, newOperator(10, 1, sqr, prefix, right)));
+}
+
+void deleteNode(Tree* node)
+{
+    if(node == NULL)
+        return;
+    else
+    {
+        //assumes node->children isn't null
+        Tree** it = node -> children;
+        while(*it != NULL)
+            deleteNode(*it);
+    }
+}
+
+void tokenizer_cleanup()
+{
+    deleteNode(dictionary);
+}
+
 
 char* skip_digits(char* text)
 {
