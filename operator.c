@@ -2,19 +2,19 @@
 #include <stdlib.h>
 
 double sum(double* args){
-    return args[0] + args[1];
+    return args[1] + args[0];
 }
 
 double diff(double* args){
-    return args[0] - args[1];
+    return args[1] - args[0];
 }
 
 double mult(double* args){
-    return args[0] * args[1];
+    return args[1] * args[0];
 }
 
 double my_div(double* args){
-    return args[0] / args[1];
+    return args[1] / args[0];
 }
 
 double my_sqrt(double* args){
