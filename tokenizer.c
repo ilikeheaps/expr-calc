@@ -93,10 +93,17 @@ void deleteNode(Tree* node)
         return;
     else
     {
+        //delete value
+        free(node -> value); //value should be of type Token*
+        
+        //delete all linked nodes
         //assumes node->children isn't null
         Tree** it = node -> children;
         while(*it != NULL)
             deleteNode(*it);
+        
+        //delete node itself
+        free(node);
     }
 }
 

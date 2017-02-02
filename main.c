@@ -90,6 +90,7 @@ Tree* makeOpTree(Token** expr)
             case value: ;
                 printf("   Found value\n");
                 Tree* newVal = newTree((*currentToken) -> value);
+                free(*currentToken);
                 if(newVal == NULL)
                 {
                     //TODO: error handling
@@ -164,6 +165,22 @@ double calcNode(Tree* node)
     }
 }
 
+void deleteOpTree(Tree* node)
+{
+    if(node != NULL)
+    {
+        //leaf node containing pointer to double allocted on the heap
+        if(node -> children == NULL)
+            free(node -> value);
+        //inner node containing pointer to a function
+        else
+            for(Tree** current = node->children; *current != NULL; current++)
+                deleteOpTree(*current);
+       
+        free(node);
+    }
+}
+
 #define max_line_len 1000
 
 char input[max_line_len + 1];
@@ -183,7 +200,8 @@ double eval(char* exp)
     printf("Calculating value\n");
     double val = calcNode(opTree);
     
-    //TODO: free operation tree (and everything included in it: tokens?, values)
+    //free operation tree and contained values
+    deleteOpTree(opTree);
     
     return val;
 }
@@ -195,6 +213,7 @@ int main(int argc, char* args[])
     printf("Initializing tokenizer\n");
     tokenizer_initialize();
     
+    //evaluate command line arguments
     if(argc > 1)
     {
         for(int i=1; i<argc; i++)
@@ -219,7 +238,8 @@ int main(int argc, char* args[])
             printf("%lf\n", eval(input));
         }
     
-    //TODO: free tokenizer
+    //free tokenizer
+    tokenizer_cleanup();
     
     return 0;
 }
