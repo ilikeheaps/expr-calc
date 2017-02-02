@@ -83,10 +83,10 @@ int pushSt(Stack* s, void* el)
  */
 void* topSt(Stack* s)
 {
-    if(s->size > 1)
-        return s->data[s->size - 1];
-    else
+    if(s->size < 1)
         return NULL;
+        
+    return s->data[s->size - 1];
 }
 
 /* Doesn't reduce the stack capacity.
