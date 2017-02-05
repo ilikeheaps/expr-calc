@@ -9,9 +9,6 @@
 //returns -1 if the stack doesn't have enough values to apply the function
 int applyOpToSt(Operator* op, Stack* st)
 {
-    printf("   op: %p\n", op);
-    printf("   Stack size: %d\n", sizeSt(st));
-    printf("   Expecting %d arguments\n", op -> arity);
     if(sizeSt(st) < op -> arity)
         return -1;
     
@@ -50,12 +47,10 @@ Tree* makeOpTree(Token** expr)
     
     for(Token** currentToken = expr; *currentToken != NULL; currentToken++)
     {
-        printf(" Parsing next token...\n");
         switch((*currentToken)->type)
         {
             //note: applying operators means applying them to the top elements of the values stack
             case operator: ;
-                printf("  Found operator\n");
                 Operator* currOp = (*currentToken) -> value;
                 while(1)
                 {
@@ -84,11 +79,9 @@ Tree* makeOpTree(Token** expr)
                 }
                 
                 //push the new operator (still packed as a token) onto the stack
-                printf("   Pushing %p onto operator stack\n", *currentToken);
                 pushSt(operators, *currentToken);
                 break;
             case value: ;
-                printf("   Found value\n");
                 Tree* newVal = newTree((*currentToken) -> value);
                 free(*currentToken);
                 if(newVal == NULL)
@@ -103,11 +96,9 @@ Tree* makeOpTree(Token** expr)
                 }
                 break;
             case openBracket:
-                printf("  Found opening bracket\n");
                 pushSt(operators, *currentToken);
                 break;
             case endBracket: ;
-                printf("  Found ending bracket\n");
                 //TODO: handle errors: popSt, applyOp
                 Token* opTop;
                 opTop = (Token*) popSt(operators);
@@ -124,21 +115,16 @@ Tree* makeOpTree(Token** expr)
         }
         
     }
-    printf("Parsed all tokens, reducing stacks\n");
     
     
     //apply operators to values until there is only one value left
     //TODO: if there are any operators left, return some error
     while(sizeSt(values) > 1)
     {
-        printf(" Operators stack size: %d\n", sizeSt(operators));
         Token* opToken = popSt(operators);
-        printf(" token: %p\n", opToken);
         Operator* opTop = opToken -> value;
         //TODO: error handling
-        printf(" Applying operator to stack...\n");
         applyOpToSt(opTop, values);
-        printf(" Applied\n");
     }
     Tree* ans = popSt(values);
         
@@ -187,17 +173,10 @@ char input[max_line_len + 1];
 
 double eval(char* exp)
 {
-    printf("Tokenizing expression\n");
     Token** tokens = tokenizer_process(exp);
     
-    Token** tok;
-    for(tok = tokens; *tok != NULL; tok++);
-    printf("# of tokens: %ld\n", tok - tokens);
-    
     //make operation tree and evaluate it
-    printf("Parsing tokens\n");
     Tree* opTree = makeOpTree(tokens);
-    printf("Calculating value\n");
     double val = calcNode(opTree);
     
     //free operation tree and contained values
@@ -208,9 +187,7 @@ double eval(char* exp)
 
 int main(int argc, char* args[])
 {    
-    printf("%d %s\n", argc, args[1]);
     //initialize tokenizer
-    printf("Initializing tokenizer\n");
     tokenizer_initialize();
     
     //evaluate command line arguments
