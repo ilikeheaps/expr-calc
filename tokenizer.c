@@ -199,10 +199,18 @@ Token** tokenizer_process(char* exp)
                 }
                 else
                 {
-                    printf("Błąd na %ld znaku: nie znaleziono etykiety\n", current_char - exp);
+                    printf("Error on %ld character: label not found\n", current_char - exp);
                     
+                    //free value tokens and tokenized array
                     free(val);
-                    //TODO: free value tokens and tokenized array
+                    for(int i = 0; i < token_count; i++)
+                        if(tokenized[i]->type == value)
+                        {
+                            free(tokenized[i] -> value);
+                            free(tokenized[i]);
+                        }
+                    free(tokenized);
+                    
                     return NULL;
                 }
             }
