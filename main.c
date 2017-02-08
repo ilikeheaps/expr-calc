@@ -26,6 +26,108 @@ int applyOpToSt(Operator* op, Stack* st)
     return 0;
 }
 
+typedef struct
+{
+    int l; //found values - to  the left
+    int r; //required values - to the right
+} Pair;
+    
+Pair* newPair(int l, int r)
+{
+    Pair* new = malloc(sizeof(*new));
+    new -> l = l;
+    new -> r = r;
+    return new;
+}
+
+/*
+ * 1 - no value before infix operator
+ * 2 - applying operator to operator
+ * 3 - not enough values to complete expression in brackets
+ * 4 - mismatched ending bracket
+ * 5 - mismatched opening bracket
+ * 6 - not enough values applied to operators
+ * 7 - expression doesn't represent one value (as in it might be a pair or no value at all)
+ */
+int checkSyntax(Token** expr)
+{
+    Pair* matches = newPair(0, 0);
+    Stack* bracketsMatch = newStack();
+    for(Token** currentToken = expr; *currentToken != NULL; currentToken++)
+    {
+        switch((*currentToken) -> type)
+        {
+            case operator: ;
+                Operator* currentOp = (*currentToken) -> value;
+                if(currentOp -> notation == infix)
+                {
+                    if(1 <= matches->l && matches->r == 0)
+                    {
+                        matches->r++;
+                    }
+                    else
+                        if(matches->l <= 1)
+                            return 1; //no value before operator
+                        else
+                            return 2; //applying operator to operator
+                }
+                else //notation == prefix
+                {
+                    if(matches->r == 0)
+                    {
+                        matches->l++;
+                        matches->r += currentOp -> arity;
+                    }
+                    else
+                        return 2; //applying operator to operator
+                }
+                break;
+                
+            case value:
+                if(matches->r == 0)
+                    matches->l++;
+                else
+                    matches->r--;
+                break;
+                
+            case openBracket:
+                pushSt(bracketsMatch, matches);
+                matches = newPair(0, 0);
+                break;
+                
+            case endBracket:
+                if(matches->r > 0)
+                    return 3;
+                if(isEmptySt(bracketsMatch))
+                    return 4;
+                    
+                Pair* outer = popSt(bracketsMatch);
+                outer->r -= matches->l;
+                if(outer->r < 0)
+                {
+                    outer->l -= outer->r;
+                    outer->r = 0;
+                }
+                free(matches);
+                matches = outer;
+                break;
+        }
+    }
+    int ret = 0;
+    if(!isEmptySt(bracketsMatch))
+        ret = 5;
+    if(matches->r > 0)
+        ret = 6;
+    if(matches->l != 1)
+    {
+        printf("L: %d\n", matches->l);
+        ret = 7;
+    }
+    
+    free(matches);
+    return ret;
+}
+
 //value type in inner nodes: double (*)(double*)
 //value type in leaves: double* <-- must be freed later
 Tree* makeOpTree(Token** expr)
@@ -218,6 +320,45 @@ double eval(char* exp)
     
     if(tokens == NULL)
         return 0;
+    
+    switch(checkSyntax(tokens))
+    {
+        /*
+         * 1 - no value before infix operator
+         * 2 - applying operator to operator
+         * 3 - not enough values to complete expression in brackets
+         * 4 - mismatched ending bracket
+         * 5 - mismatched opening bracket
+         * 6 - not enough values applied to operators
+         * 7 - expression doesn't represent one value (as in it might be a pair or no value at all)
+         */
+        case 0:
+            printf("Syntax okay\n");
+            break;
+        case 1:
+            printf("Syntax error: no value before infix operator\n");
+            return 0;
+        case 2:
+            printf("Syntax error: applying operator to operator\n");
+            return 0;
+        case 3:
+            printf("Syntax error: not enough values to complete expression in brackets\n");
+            return 0;
+        case 4:
+            printf("Syntax error: mismatched ending bracket\n");
+            return 0;
+        case 5:
+            printf("Syntax error: mismatched opening bracket\n");
+            return 0;
+        case 6:
+            printf("Syntax error: not enough values applied to operators\n");
+            return 0;
+        case 7:
+            printf("Syntax error: expression doesn't represent one value\n");
+            return 0;
+            break;
+        
+    }
     
     Token** tok;
     for(tok = tokens; *tok != NULL; tok++);
