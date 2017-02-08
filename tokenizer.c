@@ -64,7 +64,6 @@ Token* functionToken(int priority, int arity, double(*func)(double*), notation_t
     return newToken(operator, newOperator(priority, arity, func, notation, assoc));
 }
 
-#define opsCount 7
 void tokenizer_initialize()
 {
     dictionary = allocateNode();
