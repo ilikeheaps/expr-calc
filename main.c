@@ -110,12 +110,21 @@ Tree* makeOpTree(Token** expr)
                 printf("  Found ending bracket\n");
                 //TODO: handle errors: popSt, applyOp
                 Token* opTop;
-                opTop = (Token*) popSt(operators);
-                while(opTop -> type != openBracket)
+                if(!isEmptySt(operators))
+                    opTop = (Token*) popSt(operators);
+                else
+                    opTop = NULL;
+                while(!isEmptySt(operators) && opTop -> type != openBracket)
                 {
                     //opTop should be of operator type
                     applyOpToSt((Operator*) opTop -> value, values);
                     opTop = (Token*) popSt(operators);
+                }
+                if(opTop -> type != openBracket)
+                {
+                    printf("Error: unmatched ending bracket\n");
+                    //TODO deallocate stuff
+                    return NULL;
                 }
                 //removes opening bracket
                 //chyba nie (void) popSt(operators);
@@ -127,21 +136,38 @@ Tree* makeOpTree(Token** expr)
     printf("Parsed all tokens, reducing stacks\n");
     
     
-    //apply operators to values until there is only one value left
-    //TODO: if there are any operators left, return some error
-    while(sizeSt(values) > 1)
+    //apply operators to values until there are no operators left
+    while(!isEmptySt(operators))
     {
         printf(" Operators stack size: %d\n", sizeSt(operators));
+        
         Token* opToken = popSt(operators);
         printf(" token: %p\n", opToken);
+        
+        //error handling
+        if(opToken -> type != operator)
+        {
+            if(opToken -> type == openBracket)
+                printf("Error: unmatched bracket\n");
+            if(opToken -> type == endBracket)
+                printf("Implementation error (main.c %d): ending bracket remained\n", __LINE__);
+            if(opToken -> type == value)
+                printf("Implementation error: value on operator stack\n");
+            //TODO: deallocate stuff
+            
+            return NULL;
+        }
         Operator* opTop = opToken -> value;
-        //TODO: error handling
         printf(" Applying operator to stack...\n");
-        applyOpToSt(opTop, values);
+        if(applyOpToSt(opTop, values) != 0)
+        {
+            printf("Error applying operators: not enough arguments\n");
+            return NULL;
+        }
         printf(" Applied\n");
     }
     Tree* ans = popSt(values);
-        
+    
     //TODO: deallocate stuff (stacks and perhaps something more)
     
     return ans;
@@ -190,6 +216,9 @@ double eval(char* exp)
     printf("Tokenizing expression\n");
     Token** tokens = tokenizer_process(exp);
     
+    if(tokens == NULL)
+        return 0;
+    
     Token** tok;
     for(tok = tokens; *tok != NULL; tok++);
     printf("# of tokens: %ld\n", tok - tokens);
@@ -197,6 +226,9 @@ double eval(char* exp)
     //make operation tree and evaluate it
     printf("Parsing tokens\n");
     Tree* opTree = makeOpTree(tokens);
+    if(opTree == NULL)
+        return 0;
+    
     printf("Calculating value\n");
     double val = calcNode(opTree);
     
