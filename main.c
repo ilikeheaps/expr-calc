@@ -73,13 +73,11 @@ int checkSyntax(Token** expr)
                 }
                 else //notation == prefix
                 {
-                    if(matches->r == 0)
-                    {
-                        matches->l++;
-                        matches->r += currentOp -> arity;
-                    }
+                    if(matches->r > 0)
+                        matches->r--;
                     else
-                        return 2; //applying operator to operator
+                        matches->l++;
+                    matches->r += currentOp -> arity;
                 }
                 break;
                 
