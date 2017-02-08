@@ -114,9 +114,9 @@ int checkSyntax(Token** expr)
     int ret = 0;
     if(!isEmptySt(bracketsMatch))
         ret = 5;
-    if(matches->r > 0)
+    else if(matches->r > 0)
         ret = 6;
-    if(matches->l != 1)
+    else if(matches->l != 1)
     {
         printf("L: %d\n", matches->l);
         ret = 7;
