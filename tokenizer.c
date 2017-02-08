@@ -76,10 +76,12 @@ void tokenizer_initialize()
     add_to_dictionary("/", functionToken(6, 2, my_div, infix, left));
     add_to_dictionary("^", functionToken(7, 2, my_pow, infix, right));
     
+    
     //prefix functions
     add_to_dictionary("sqrt", functionToken(10, 1, my_sqrt, prefix, right));
     add_to_dictionary("sqr", functionToken(10, 1, sqr, prefix, right));
     add_to_dictionary("sum2", functionToken(10, 2, sum2, prefix, right));
+    add_to_dictionary("fact", functionToken(10, 1, fact, prefix, right));
     
     
     //brackets
