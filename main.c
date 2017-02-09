@@ -122,13 +122,18 @@ int checkSyntax(Token** expr)
         ret = 7;
     }
     
+    while(!isEmptySt(bracketsMatch))
+        free(popSt(bracketsMatch));
+    
+    deleteStack(bracketsMatch);
+    
     free(matches);
     return ret;
 }
 
 //value type in inner nodes: double (*)(double*)
 //value type in leaves: double* <-- must be freed later
-Tree* makeOpTree(Token** expr)
+Tree** makeOpTrees(Token** expr, int* result_count)
 {
     //cotains operators or brackets packed into token structure
     Stack* operators = newStack();
@@ -266,9 +271,19 @@ Tree* makeOpTree(Token** expr)
         }
         printf(" Applied\n");
     }
-    Tree* ans = popSt(values);
+    int values_count = sizeSt(values);
+    (*result_count) = values_count;
     
-    //TODO: deallocate stuff (stacks and perhaps something more)
+    Tree** ans = malloc(values_count * sizeof(*ans));
+    for(int i = 0; i < values_count; i++)
+        ans[i] = popSt(values);
+    
+    //---deallocate stuff---
+    //after popping all values it should be empty
+    deleteStack(values);
+    
+    //if syntax check succedeed operators stack should be empty
+    deleteStack(operators);
     
     return ans;
 }
@@ -300,9 +315,12 @@ void deleteOpTree(Tree* node)
             free(node -> value);
         //inner node containing pointer to a function
         else
+        {
             for(Tree** current = node->children; *current != NULL; current++)
                 deleteOpTree(*current);
-       
+            free(node -> children);
+        }
+        
         free(node);
     }
 }
@@ -311,7 +329,7 @@ void deleteOpTree(Tree* node)
 
 char input[max_line_len + 1];
 
-double eval(char* exp)
+double* eval(char* exp, int* result_count)
 {
     printf("Tokenizing expression\n");
     Token** tokens = tokenizer_process(exp);
@@ -364,17 +382,35 @@ double eval(char* exp)
     
     //make operation tree and evaluate it
     printf("Parsing tokens\n");
-    Tree* opTree = makeOpTree(tokens);
-    if(opTree == NULL)
+    
+    int values_count = 0;
+    Tree** opTrees = makeOpTrees(tokens, &values_count);
+    if(values_count == 0)
         return 0;
+    *result_count = values_count;
     
-    printf("Calculating value\n");
-    double val = calcNode(opTree);
+    printf("Calculating value(s)\n");
+    double* ans = malloc(values_count * sizeof(*ans));
+    for(int i = 0; i < values_count; i++)
+        ans[i] = calcNode(opTrees[i]);
+        
+   //free tokens array
+    /*
+    for(Token** curr = tokens; *curr != NULL; curr++)
+    {
+        if((*curr) -> type == value)
+            free((*curr) -> value);
+    }
+    */
+    free(tokens);
     
-    //free operation tree and contained values
-    deleteOpTree(opTree);
+    //free operation trees and contained values
+    //TODO: consider moving freeing values to makeOpTrees
+    for(int i = 0; i < values_count; i++)
+        deleteOpTree(opTrees[i]);
+    free(opTrees);
     
-    return val;
+    return ans;
 }
 
 int main(int argc, char* args[])
@@ -388,7 +424,15 @@ int main(int argc, char* args[])
     if(argc > 1)
     {
         for(int i=1; i<argc; i++)
-            printf("%lf\n", eval(args[i]));
+        {
+            printf("Evaluating %s\n", args[i]);
+            int values_count = 0;
+            double* values = eval(args[i], &values_count);
+            for(int i = 0; i < values_count; i++)
+                printf("%lf\n", values[i]);
+            
+            free(values);
+        }
     }
     else
         //interactive mode
@@ -405,8 +449,12 @@ int main(int argc, char* args[])
               (input[4] == '\n' || input[4] == '\0'))
                 break;
             
+            int values_count = 0;
+            double* values = eval(input, &values_count);
+            for(int i = 0; i < values_count; i++)
+                printf("%lf\n", values[i]);
             
-            printf("%lf\n", eval(input));
+            free(values);
         }
     
     //free tokenizer
