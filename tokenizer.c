@@ -87,9 +87,25 @@ void tokenizer_initialize()
     add_to_dictionary(")", newToken(endBracket, NULL));
 }
 
-void deleteNodeValue(void* value, int children_count)
+void deleteNodeValue(void* node_value, int children_count)
 {
-    free(value); //should be of type Token*
+    if(node_value != NULL) //root node has NULL value
+    {
+        Token* token = node_value;
+        switch(token -> type)
+        {
+            case operator:
+                deleteOperator((Operator*) token -> value);
+                break;
+            case value:
+                free(token -> value);
+                break;
+            case endBracket:
+            case openBracket:
+                break;
+        }
+        free(token);
+    }
 }
 
 void deleteNode(Tree* node)

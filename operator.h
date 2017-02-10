@@ -31,3 +31,4 @@ double sum2(double* args);
 double fact(double* args);
 
 Operator* newOperator(int priority, int arity, double (*function)(double*), notation_type notation, direction_type assoc);
+void deleteOperator(Operator*);

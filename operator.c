@@ -58,3 +58,8 @@ Operator* newOperator(int priority, int arity, double (*function)(double*), nota
     
     return new;
 }
+
+void deleteOperator(Operator* op)
+{
+    free(op);
+}
