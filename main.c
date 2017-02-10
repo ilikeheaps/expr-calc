@@ -15,14 +15,12 @@ int applyOpToSt(Operator* op, Stack* st)
     if(sizeSt(st) < op -> arity)
         return -1;
     
-    Tree** values = malloc( (op->arity + 1) * sizeof(*values) );
+    Tree** values = malloc( (op->arity) * sizeof(*values) );
     
-    int imax = op -> arity;
-    for(int i=0; i < imax; i++)
+    for(int i=0; i < op -> arity; i++)
         values[i] = popSt(st);
-    values[imax] = NULL;
     
-    pushSt(st, joinTrees(op->function, values));
+    pushSt(st, joinTrees(op->function, values, op->arity));
     return 0;
 }
 
@@ -194,7 +192,7 @@ Tree** makeOpTrees(Token** expr, int* result_count)
                 break;
             case value: ;
                 printf("   Found value\n");
-                Tree* newVal = newTree((*currentToken) -> value);
+                Tree* newVal = newTree((*currentToken) -> value, 0);
                 free(*currentToken);
                 if(newVal == NULL)
                 {
@@ -288,15 +286,14 @@ Tree** makeOpTrees(Token** expr, int* result_count)
     return ans;
 }
 
-
+//TODO use tree.h
 double calcNode(Tree* node)
 {
-    if(node -> children == NULL)
+    if(node -> children_count == 0)
         return *((double*)(node -> value));
     else
     {
-        int count;
-        for(count=0; node->children[count] != NULL; count++);
+        int count = node -> children_count;
         double* children_val = malloc(count * sizeof(*children_val));
         for(int i=0; i < count; i++)
             children_val[i] = calcNode(node->children[i]);
@@ -306,23 +303,15 @@ double calcNode(Tree* node)
     }
 }
 
+void deleteOpTreeValue(void* value, int children_count)
+{
+    if(children_count == 0)
+        free(value);
+}
+
 void deleteOpTree(Tree* node)
 {
-    if(node != NULL)
-    {
-        //leaf node containing pointer to double allocted on the heap
-        if(node -> children == NULL)
-            free(node -> value);
-        //inner node containing pointer to a function
-        else
-        {
-            for(Tree** current = node->children; *current != NULL; current++)
-                deleteOpTree(*current);
-            free(node -> children);
-        }
-        
-        free(node);
-    }
+    deleteTree(node, deleteOpTreeValue);
 }
 
 #define max_line_len 1000

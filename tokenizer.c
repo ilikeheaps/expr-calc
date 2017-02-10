@@ -14,8 +14,7 @@ const int initial_array_size = 10;
 
 Tree* allocateNode()
 {
-    Tree* new = newTree(NULL);
-    new->children = calloc(char_count, sizeof(*new->children));
+    Tree* new = newTree(NULL, char_count);
     return new;
 }
 
@@ -88,24 +87,14 @@ void tokenizer_initialize()
     add_to_dictionary(")", newToken(endBracket, NULL));
 }
 
+void deleteNodeValue(void* value, int children_count)
+{
+    free(value); //should be of type Token*
+}
+
 void deleteNode(Tree* node)
 {
-    if(node == NULL)
-        return;
-    else
-    {
-        //delete value
-        free(node -> value); //value should be of type Token*
-        
-        //delete all linked nodes
-        //assumes node->children isn't null
-        Tree** it = node -> children;
-        while(*it != NULL)
-            deleteNode(*it);
-        
-        //delete node itself
-        free(node);
-    }
+    deleteTree(node, deleteNodeValue);
 }
 
 void tokenizer_cleanup()
