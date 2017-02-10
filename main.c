@@ -392,17 +392,17 @@ double* eval(char* exp, int* result_count)
                 free(opTrees);
             }
         }
-    }
     
-    //free value type tokens and tokens array
-    for(Token** currToken = tokens; *currToken != NULL; currToken++)
-        if((*currToken) -> type == value)
-        {
-            free((*currToken) -> value);
-            free(*currToken);
-        }
+        //free value type tokens and tokens array
+        for(Token** currToken = tokens; *currToken != NULL; currToken++)
+            if((*currToken) -> type == value)
+            {
+                free((*currToken) -> value);
+                free(*currToken);
+            }
 
-    free(tokens);
+        free(tokens);
+        }
     
     return ans;
 }
