@@ -49,9 +49,10 @@ Pair* newPair(int l, int r)
  */
 int checkSyntax(Token** expr)
 {
+    int ret = 0;
     Pair* matches = newPair(0, 0);
     Stack* bracketsMatch = newStack();
-    for(Token** currentToken = expr; *currentToken != NULL; currentToken++)
+    for(Token** currentToken = expr; *currentToken != NULL && ret == 0; currentToken++)
     {
         switch((*currentToken) -> type)
         {
@@ -65,9 +66,9 @@ int checkSyntax(Token** expr)
                     }
                     else
                         if(matches->l <= 1)
-                            return 1; //no value before operator
+                            ret = 1; //no value before operator
                         else
-                            return 2; //applying operator to operator
+                            ret = 2; //applying operator to operator
                 }
                 else //notation == prefix
                 {
@@ -93,9 +94,9 @@ int checkSyntax(Token** expr)
                 
             case endBracket:
                 if(matches->r > 0)
-                    return 3;
+                    ret = 3;
                 if(isEmptySt(bracketsMatch))
-                    return 4;
+                    ret = 4;
                     
                 Pair* outer = popSt(bracketsMatch);
                 outer->r -= matches->l;
@@ -109,15 +110,18 @@ int checkSyntax(Token** expr)
                 break;
         }
     }
-    int ret = 0;
-    if(!isEmptySt(bracketsMatch))
-        ret = 5;
-    else if(matches->r > 0)
-        ret = 6;
-    else if(matches->l != 1)
+    
+    if(!ret)
     {
-        printf("L: %d\n", matches->l);
-        ret = 7;
+        if(!isEmptySt(bracketsMatch))
+            ret = 5;
+        else if(matches->r > 0)
+            ret = 6;
+        else if(matches->l != 1)
+        {
+            printf("L: %d\n", matches->l);
+            ret = 7;
+        }
     }
     
     while(!isEmptySt(bracketsMatch))
@@ -193,7 +197,6 @@ Tree** makeOpTrees(Token** expr, int* result_count)
             case value: ;
                 printf("   Found value\n");
                 Tree* newVal = newTree((*currentToken) -> value, 0);
-                free(*currentToken);
                 if(newVal == NULL)
                 {
                     //TODO: error handling
@@ -305,8 +308,7 @@ double calcNode(Tree* node)
 
 void deleteOpTreeValue(void* value, int children_count)
 {
-    if(children_count == 0)
-        free(value);
+    //tree values are only tokens which should be handled elsewhere (in eval)
 }
 
 void deleteOpTree(Tree* node)
@@ -320,84 +322,87 @@ char input[max_line_len + 1];
 
 double* eval(char* exp, int* result_count)
 {
+    double* ans = NULL;
+    *result_count = 0;
+    
     printf("Tokenizing expression\n");
     Token** tokens = tokenizer_process(exp);
     
-    if(tokens == NULL)
-        return 0;
-    
-    switch(checkSyntax(tokens))
+    if(tokens != NULL)
     {
-        /*
-         * 1 - no value before infix operator
-         * 2 - applying operator to operator
-         * 3 - not enough values to complete expression in brackets
-         * 4 - mismatched ending bracket
-         * 5 - mismatched opening bracket
-         * 6 - not enough values applied to operators
-         * 7 - expression doesn't represent one value (as in it might be a pair or no value at all)
-         */
-        case 0:
-            printf("Syntax okay\n");
-            break;
-        case 1:
-            printf("Syntax error: no value before infix operator\n");
-            return 0;
-        case 2:
-            printf("Syntax error: applying operator to operator\n");
-            return 0;
-        case 3:
-            printf("Syntax error: not enough values to complete expression in brackets\n");
-            return 0;
-        case 4:
-            printf("Syntax error: mismatched ending bracket\n");
-            return 0;
-        case 5:
-            printf("Syntax error: mismatched opening bracket\n");
-            return 0;
-        case 6:
-            printf("Syntax error: not enough values applied to operators\n");
-            return 0;
-        case 7:
-            printf("Syntax error: expression doesn't represent one value\n");
-            return 0;
-            break;
-        
+        int syntax = checkSyntax(tokens);
+        if(syntax) //if syntax check fails
+        {
+            switch(syntax)
+            {
+                /*
+                * 1 - no value before infix operator
+                * 2 - applying operator to operator
+                * 3 - not enough values to complete expression in brackets
+                * 4 - mismatched ending bracket
+                * 5 - mismatched opening bracket
+                * 6 - not enough values applied to operators
+                * 7 - expression doesn't represent one value (as in it might be a pair or no value at all)
+                */
+                case 1:
+                    printf("Syntax error: no value before infix operator\n");
+                    break;
+                case 2:
+                    printf("Syntax error: applying operator to operator\n");
+                    break;
+                case 3:
+                    printf("Syntax error: not enough values to complete expression in brackets\n");
+                    break;
+                case 4:
+                    printf("Syntax error: mismatched ending bracket\n");
+                    break;
+                case 5:
+                    printf("Syntax error: mismatched opening bracket\n");
+                    break;
+                case 6:
+                    printf("Syntax error: not enough values applied to operators\n");
+                    break;
+                case 7:
+                    printf("Syntax error: expression doesn't represent one value\n");
+                    break;
+            }
+        }
+        else //syntax check succeeds
+        {
+            printf("Syntax okay.\n");
+            
+            Token** tok;
+            for(tok = tokens; *tok != NULL; tok++);
+            printf("# of tokens: %ld\n", tok - tokens);
+            
+            //make operation tree and evaluate it
+            printf("Parsing tokens\n");
+            
+            Tree** opTrees = makeOpTrees(tokens, result_count);
+            if(*result_count != 0)
+            {
+                printf("Calculating value(s)\n");
+                ans = malloc(*result_count * sizeof(*ans));
+                for(int i = 0; i < *result_count; i++)
+                    ans[i] = calcNode(opTrees[i]);
+                
+                //free operation trees and contained values
+                for(int i = 0; i < *result_count; i++)
+                    deleteOpTree(opTrees[i]);
+                free(opTrees);
+            }
+        }
     }
     
-    Token** tok;
-    for(tok = tokens; *tok != NULL; tok++);
-    printf("# of tokens: %ld\n", tok - tokens);
-    
-    //make operation tree and evaluate it
-    printf("Parsing tokens\n");
-    
-    int values_count = 0;
-    Tree** opTrees = makeOpTrees(tokens, &values_count);
-    if(values_count == 0)
-        return 0;
-    *result_count = values_count;
-    
-    printf("Calculating value(s)\n");
-    double* ans = malloc(values_count * sizeof(*ans));
-    for(int i = 0; i < values_count; i++)
-        ans[i] = calcNode(opTrees[i]);
-        
-   //free tokens array
-    /*
-    for(Token** curr = tokens; *curr != NULL; curr++)
-    {
-        if((*curr) -> type == value)
-            free((*curr) -> value);
-    }
-    */
+    //free value type tokens and tokens array
+    for(Token** currToken = tokens; *currToken != NULL; currToken++)
+        if((*currToken) -> type == value)
+        {
+            free((*currToken) -> value);
+            free(*currToken);
+        }
+
     free(tokens);
-    
-    //free operation trees and contained values
-    //TODO: consider moving freeing values to makeOpTrees
-    for(int i = 0; i < values_count; i++)
-        deleteOpTree(opTrees[i]);
-    free(opTrees);
     
     return ans;
 }
