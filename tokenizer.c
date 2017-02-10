@@ -14,8 +14,7 @@ const int initial_array_size = 10;
 
 Tree* allocateNode()
 {
-    Tree* new = newTree(NULL);
-    new->children = calloc(char_count, sizeof(*new->children));
+    Tree* new = newTree(NULL, char_count);
     return new;
 }
 
@@ -64,7 +63,6 @@ Token* functionToken(int priority, int arity, double(*func)(double*), notation_t
     return newToken(operator, newOperator(priority, arity, func, notation, assoc));
 }
 
-#define opsCount 7
 void tokenizer_initialize()
 {
     dictionary = allocateNode();
@@ -76,10 +74,12 @@ void tokenizer_initialize()
     add_to_dictionary("/", functionToken(6, 2, my_div, infix, left));
     add_to_dictionary("^", functionToken(7, 2, my_pow, infix, right));
     
+    
     //prefix functions
     add_to_dictionary("sqrt", functionToken(10, 1, my_sqrt, prefix, right));
     add_to_dictionary("sqr", functionToken(10, 1, sqr, prefix, right));
     add_to_dictionary("sum2", functionToken(10, 2, sum2, prefix, right));
+    add_to_dictionary("fact", functionToken(10, 1, fact, prefix, right));
     
     
     //brackets
@@ -87,24 +87,30 @@ void tokenizer_initialize()
     add_to_dictionary(")", newToken(endBracket, NULL));
 }
 
+void deleteNodeValue(void* node_value, int children_count)
+{
+    if(node_value != NULL) //root node has NULL value
+    {
+        Token* token = node_value;
+        switch(token -> type)
+        {
+            case operator:
+                deleteOperator((Operator*) token -> value);
+                break;
+            case value:
+                free(token -> value);
+                break;
+            case endBracket:
+            case openBracket:
+                break;
+        }
+        free(token);
+    }
+}
+
 void deleteNode(Tree* node)
 {
-    if(node == NULL)
-        return;
-    else
-    {
-        //delete value
-        free(node -> value); //value should be of type Token*
-        
-        //delete all linked nodes
-        //assumes node->children isn't null
-        Tree** it = node -> children;
-        while(*it != NULL)
-            deleteNode(*it);
-        
-        //delete node itself
-        free(node);
-    }
+    deleteTree(node, deleteNodeValue);
 }
 
 void tokenizer_cleanup()
@@ -188,8 +194,17 @@ Token** tokenizer_process(char* exp)
                 }
                 else
                 {
+                    printf("Error on %ld character: label not found\n", current_char - exp);
+                    //free value tokens and tokenized array
                     free(val);
-                    //TODO: free value tokens and tokenized array
+                    for(int i = 0; i < token_count; i++)
+                        if(tokenized[i]->type == value)
+                        {
+                            free(tokenized[i] -> value);
+                            free(tokenized[i]);
+                        }
+                    free(tokenized);
+                    
                     return NULL;
                 }
             }

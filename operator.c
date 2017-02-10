@@ -34,6 +34,18 @@ double sum2(double* args){
     return args[1] + args[0];
 }
 
+double fact_rec(double a)
+{
+    if(a <= 0)
+        return 1;
+    else 
+        return a * fact_rec(a-1);
+}
+
+double fact(double* args){
+    return fact_rec(args[0]);
+}
+
 Operator* newOperator(int priority, int arity, double (*function)(double*), notation_type notation, direction_type assoc)
 {
     Operator* new = malloc(sizeof(*new));
@@ -45,4 +57,9 @@ Operator* newOperator(int priority, int arity, double (*function)(double*), nota
     new -> assoc = assoc;
     
     return new;
+}
+
+void deleteOperator(Operator* op)
+{
+    free(op);
 }

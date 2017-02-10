@@ -2,23 +2,25 @@
 #include <stdlib.h>
 
 //returns NULL on memory allocation failure
-Tree* newTree(void* value)
+Tree* newTree(void* value, int children_count)
 {
     Tree* ret = malloc(sizeof(*ret));
     if(ret != NULL)
     {
-        ret -> children = NULL;
+        ret -> children = calloc(children_count, sizeof( *(ret -> children) ));
+        ret -> children_count = children_count;
         ret -> value = value;
     }
     return ret;
 }
 
 //returns NULL on memory allocation failure
-Tree* joinTrees(void* value, Tree** trees)
+Tree* joinTrees(void* value, Tree** trees, int tree_count)
 {
     Tree* ret = malloc(sizeof(*ret));
     if(ret != NULL)
     {
+        ret -> children_count = tree_count;
         ret -> children = trees;
         ret -> value = value;
     }
@@ -26,37 +28,34 @@ Tree* joinTrees(void* value, Tree** trees)
 }
 
 //careful: fun must deallocate the second argument if it doesn't keep it
-void* TreeDFT(Tree* startNode, void* (*fun)(void*, void**))
+void* TreeDFT(Tree* start_node, void* (*fun)(void*, void**, int))
 {
-    Tree** current = startNode -> children;
-    int childrenCount = 0;
+    int children_count = start_node -> children_count;
     
-    while(*current != NULL)
-    {
-        childrenCount++;
-        current++;
-    }
+    void** children_values = malloc(children_count*sizeof(*children_values));
+    Tree** children = start_node -> children;
     
-    void** childrenValues = malloc((childrenCount + 1)*sizeof(*childrenValues));
-    Tree** children = startNode -> children;
+    for(int i=0; i < children_count; i++)
+        if(children[i] != NULL)
+            children_values[i] = TreeDFT(children[i], fun);
+        else
+            children_values[i] = NULL;
     
-    for(int i=0; i < childrenCount; i++)
-        childrenValues[i] = TreeDFT(children[i], fun);
-    childrenValues[childrenCount] = NULL;
-    
-    return fun(startNode->value, childrenValues);
+    return fun(start_node->value, children_values, children_count);
 }
 
-void deleteTree(Tree* root, void (*deleteValue)(void*))
+void deleteTree(Tree* root, void (*delete_value)(void*, int))
 {
-    Tree** current = root -> children;
-    while(*current != NULL)
-    {
-        deleteTree(*current, deleteValue);
-        current++;
-    }
+    if(root == NULL)
+        return;
+    
+    int children_count = root -> children_count;
+    
+    for(int i=0; i < children_count; i++)
+        deleteTree(root->children[i], delete_value);
     free(root -> children);
-    deleteValue(root -> value);
+    
+    delete_value(root -> value, root -> children_count);
     free(root);
 }
         
