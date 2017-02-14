@@ -24,17 +24,20 @@ int applyOpToSt(Operator* op, Stack* st)
     return 0;
 }
 
+//TODO: make pair into triple holding also number of separators
 typedef struct
 {
     int l; //found values - to  the left
     int r; //required values - to the right
-} Pair;
+    int s;
+} Triple;
     
-Pair* newPair(int l, int r)
+Triple* newTriple(int l, int r, int s)
 {
-    Pair* new = malloc(sizeof(*new));
+    Triple* new = malloc(sizeof(*new));
     new -> l = l;
     new -> r = r;
+    new -> s = s;
     return new;
 }
 
@@ -45,12 +48,15 @@ Pair* newPair(int l, int r)
  * 4 - mismatched ending bracket
  * 5 - mismatched opening bracket
  * 6 - not enough values applied to operators
- * 7 - expression doesn't represent one value (as in it might be a pair or no value at all)
+ * 7 - expression doesn't represent at least one value
+ * 8 - no value between value separators
+ * 9 - no separator between values
  */
+//TODO: account for separators
 int checkSyntax(Token** expr)
 {
     int ret = 0;
-    Pair* matches = newPair(0, 0);
+    Triple* matches = newTriple(0, 0, 0);
     Stack* bracketsMatch = newStack();
     for(Token** currentToken = expr; *currentToken != NULL && ret == 0; currentToken++)
     {
@@ -60,7 +66,7 @@ int checkSyntax(Token** expr)
                 Operator* currentOp = (*currentToken) -> value;
                 if(currentOp -> notation == infix)
                 {
-                    if(1 <= matches->l && matches->r == 0)
+                    if(matches -> s + 1 <= matches->l && matches->r == 0)
                     {
                         matches->r++;
                     }
@@ -75,21 +81,27 @@ int checkSyntax(Token** expr)
                     if(matches->r > 0)
                         matches->r--;
                     else
-                        matches->l++;
+                        if((matches -> l) - (matches -> s) == 0)
+                            matches->l++;
+                        else
+                            ret = 6;
                     matches->r += currentOp -> arity;
                 }
                 break;
                 
             case value:
                 if(matches->r == 0)
-                    matches->l++;
+                    if(matches->s < matches->l)
+                        ret = 9;
+                    else
+                        matches->l++;
                 else
                     matches->r--;
                 break;
                 
             case openBracket:
                 pushSt(bracketsMatch, matches);
-                matches = newPair(0, 0);
+                matches = newTriple(0, 0, 0);
                 break;
                 
             case endBracket:
@@ -98,7 +110,7 @@ int checkSyntax(Token** expr)
                 if(isEmptySt(bracketsMatch))
                     ret = 4;
                     
-                Pair* outer = popSt(bracketsMatch);
+                Triple* outer = popSt(bracketsMatch);
                 outer->r -= matches->l;
                 if(outer->r < 0)
                 {
@@ -107,6 +119,14 @@ int checkSyntax(Token** expr)
                 }
                 free(matches);
                 matches = outer;
+                break;
+                
+            case valSep:
+                matches -> s++;
+                if(matches->r > 0)
+                    ret = 6;
+                if(matches->l < matches->s)
+                    ret = 8; //no value between value separators
                 break;
         }
     }
@@ -117,11 +137,15 @@ int checkSyntax(Token** expr)
             ret = 5;
         else if(matches->r > 0)
             ret = 6;
-        else if(matches->l != 1)
+        else if(matches->l < 1)
         {
             printf("L: %d\n", matches->l);
             ret = 7;
         }
+        else if(matches->s + 1 < matches->l)
+            ret = 9;
+        else if(matches->l < matches->s + 1)
+            ret = 8;
     }
     
     while(!isEmptySt(bracketsMatch))
@@ -235,6 +259,21 @@ Tree** makeOpTrees(Token** expr, int* result_count)
                 //removes opening bracket
                 //chyba nie (void) popSt(operators);
                 break;
+            case valSep:
+                //TODO: check
+                printf("  Found value separator\n");
+                //TODO: handle errors: popSt, applyOp
+                if(!isEmptySt(operators))
+                    opTop = (Token*) topSt(operators);
+                else
+                    opTop = NULL;
+                while(!isEmptySt(operators) && opTop -> type != openBracket)
+                {
+                    //opTop should be of operator type
+                    applyOpToSt((Operator*) opTop -> value, values);
+                    popSt(operators);
+                    opTop = (Token*) topSt(operators);
+                }
             //TODO: default: error
         }
         
@@ -342,7 +381,9 @@ double* eval(char* exp, int* result_count)
                 * 4 - mismatched ending bracket
                 * 5 - mismatched opening bracket
                 * 6 - not enough values applied to operators
-                * 7 - expression doesn't represent one value (as in it might be a pair or no value at all)
+                * 7 - expression doesn't represent at least one value
+                * 8 - no value between value separators
+                * 9 - no separator between values
                 */
                 case 1:
                     printf("Syntax error: no value before infix operator\n");
@@ -363,7 +404,13 @@ double* eval(char* exp, int* result_count)
                     printf("Syntax error: not enough values applied to operators\n");
                     break;
                 case 7:
-                    printf("Syntax error: expression doesn't represent one value\n");
+                    printf("Syntax error: expression doesn't represent (at least) one value\n");
+                    break;
+                case 8:
+                    printf("Syntax error: no value between value separators\n");
+                    break;
+                case 9:
+                    printf("Syntax error: no separator between values\n");
                     break;
             }
         }
@@ -384,7 +431,7 @@ double* eval(char* exp, int* result_count)
                 printf("Calculating value(s)\n");
                 ans = malloc(*result_count * sizeof(*ans));
                 for(int i = 0; i < *result_count; i++)
-                    ans[i] = calcNode(opTrees[i]);
+                    ans[i] = calcNode(opTrees[*result_count - i - 1]);
                 
                 //free operation trees and contained values
                 for(int i = 0; i < *result_count; i++)
@@ -402,7 +449,7 @@ double* eval(char* exp, int* result_count)
             }
 
         free(tokens);
-        }
+    }
     
     return ans;
 }

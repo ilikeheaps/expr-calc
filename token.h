@@ -4,7 +4,8 @@ typedef enum
     operator,
     value,
     openBracket,
-    endBracket
+    endBracket,
+    valSep
 } atom;
 
 typedef struct

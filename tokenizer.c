@@ -80,11 +80,15 @@ void tokenizer_initialize()
     add_to_dictionary("sqr", functionToken(10, 1, sqr, prefix, right));
     add_to_dictionary("sum2", functionToken(10, 2, sum2, prefix, right));
     add_to_dictionary("fact", functionToken(10, 1, fact, prefix, right));
+    add_to_dictionary("pow", functionToken(10, 2, my_pow, prefix, right));
     
     
     //brackets
     add_to_dictionary("(", newToken(openBracket, NULL));
     add_to_dictionary(")", newToken(endBracket, NULL));
+    
+    //separator
+    add_to_dictionary(",", newToken(valSep, NULL));
 }
 
 void deleteNodeValue(void* node_value, int children_count)
@@ -102,6 +106,7 @@ void deleteNodeValue(void* node_value, int children_count)
                 break;
             case endBracket:
             case openBracket:
+            case valSep:
                 break;
         }
         free(token);

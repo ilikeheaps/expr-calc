@@ -1,11 +1,27 @@
 # expr-calc
 Simple program in C for evaluating arithmetic expressions.
 
-#Functional requirements:
+#Overview:
 1. operates on floating point numbers
-2. expressions are composed of infix operators, parantheses, one-argument functions and constants
+2. expressions are composed of infix operators, parantheses, multi-argument functions and constants
 3. each operation has a priority that defines operation precedence
 4. can work either in interactive mode in which it evaluates each expression on the input (separated by line break) or evaluate expression given in program arguments
+
+#Usage
+1. basic operations
+  
+  All operations in expression have to be written explicitly (`2(1+2)` is wrong) and each label can mean only one operation (so there is no 'negation -', there is only 'subtraction -')
+2. sequences
+  
+  One can input a sequence of expressions separated by commas. Each of them will be evaluated and the result will be displayed.
+3. functions
+  
+  Functions can be called in two ways:
+  - `f(expr1, expr2)`
+  - `f expr1 expr2`
+  
+  In the second case if the expressions contain any operators, they need to be wrapped in brackets as functions have higher priority than any operator.
+
 
 #Operators
 1. multiplying: "*"
@@ -15,13 +31,14 @@ Simple program in C for evaluating arithmetic expressions.
 5. exponentiation: "^"
 
 #Functions:
-1. square root: "sqrt( )"
-2. square: "sqr( )"
+1. square root: `sqrt(expr)`
+2. square: `sqr(expr)`
+3. factorial: `fact(expr)`
+4. exponentiation: `pow(expr1, expr2)`
 
 #Implementation details:
 1. may assume maximum length of expression to be 1000 characters
 2. transforms the expression into operation tree (Polish notation equivalent)
-3. linear complexity (respective to the number of operations and constants in expession)
+3. linear complexity (respective to the number of operations and constants in expression)
 4. transformation algorithm uses stack structure
-5. tree is represented by appropriate structure and is allocated dynamically
-6. calculations are done during depth first traversal in postorder
+5. calculations are done during depth first traversal in postorder
