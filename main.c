@@ -487,7 +487,7 @@ int main(int argc, char* args[])
                input[1] == 'x' &&
                input[2] == 'i' &&
                input[3] == 't' &&
-              (input[4] == '\n' || input[4] == '\0'))
+               input[4] == '\n')
                 break;
             
             int values_count = 0;
