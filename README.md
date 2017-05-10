@@ -1,13 +1,13 @@
 # expr-calc
 Simple program in C for evaluating arithmetic expressions.
 
-##Overview:
+## Overview:
 1. operates on floating point numbers
 2. expressions are composed of infix operators, parantheses, multi-argument functions and constants
 3. each operation has a priority that defines operation precedence
 4. can work either in interactive mode in which it evaluates each expression on the input (separated by line break) or evaluate expression given in program arguments
 
-##Usage
+## Usage
 1. basic operations
   
   All operations in expression have to be written explicitly (`2(1+2)` is wrong) and each label can mean only one operation (so there is no 'negation -', there is only 'subtraction -')
@@ -23,22 +23,15 @@ Simple program in C for evaluating arithmetic expressions.
   In the second case if the expressions contain any operators, they need to be wrapped in brackets as functions have higher priority than any operator.
 
 
-##Operators
+## Operators
 1. multiplying: "*"
 2. division: "/"
 3. addition: "+"
 4. subtraction: "-"
 5. exponentiation: "^"
 
-##Functions:
+## Functions:
 1. square root: `sqrt(expr)`
 2. square: `sqr(expr)`
 3. factorial: `fact(expr)`
 4. exponentiation: `pow(expr1, expr2)`
-
-##Implementation details:
-1. may assume maximum length of expression to be 1000 characters
-2. transforms the expression into operation tree (Polish notation equivalent)
-3. linear complexity (respective to the number of operations and constants in expression)
-4. transformation algorithm uses stack structure
-5. calculations are done during depth first traversal in postorder
